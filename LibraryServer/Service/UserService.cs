@@ -17,9 +17,14 @@ namespace LibraryServer.Service
             _jwtCreater = jwtCreater;
         }
 
-        public async Task<List<User>> GetAll(string? sortedBy = null, string? searchText = null)
+        public async Task<List<UserDTO>> GetAll(string? sortedBy = null, string? searchText = null)
         {
-            IQueryable<User> query = _context.Users;
+            IQueryable<UserDTO> query = _context.Users.Select(u=> new UserDTO
+            {
+                Id = u.Id,
+                Login = u.Login,
+                Role = u.Role
+            });
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {

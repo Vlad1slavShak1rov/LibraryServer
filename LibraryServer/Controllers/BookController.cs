@@ -43,7 +43,7 @@ namespace LibraryServer.Controllers
         }
 
         [Authorize(Roles = "Librarian")]
-        [HttpPatch]
+        [HttpPut]
         public async Task<IActionResult> UpdateBook()
         {
             return Ok();
