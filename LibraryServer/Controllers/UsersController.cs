@@ -1,5 +1,6 @@
 ﻿using LibraryServer.DTO;
 using LibraryServer.Service;
+using LibraryServer.Tools;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,7 @@ namespace LibraryServer.Controllers
     public class UserController : ControllerBase
     {
         private UserService _userService;
+       
         public UserController(UserService userService)
         {
             _userService = userService;
@@ -46,7 +48,6 @@ namespace LibraryServer.Controllers
             {
                 Id = user.Id,
                 Login = user.Login,
-                Password = user.Password,
                 Role = user.Role,
             };
 
@@ -54,19 +55,34 @@ namespace LibraryServer.Controllers
         }
 
 
+        [HttpPost("registration")]
+        public async Task<IActionResult> Registration(string login, string password)
+        {
+            try
+            {
+                var token = await _userService.Registration(login, password);
+                return Ok(new { token });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { msg = ex.Message });
+            }
+        }
+
         [HttpGet("login")]
         public async Task<IActionResult> Authorization(string login, string password)
         {
             try
             {
-                var user = await _userService.Authorization(login, password);
-                return Ok(user);
-            } 
+                var token = await _userService.Authorization(login, password);
+                return Ok(new { token });
+            }
             catch (Exception ex)
             {
-                return BadRequest(new {msg = ex.Message});
+                return BadRequest(new { msg = ex.Message });
             }
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UserDTO request)
@@ -86,18 +102,5 @@ namespace LibraryServer.Controllers
             return NoContent();
         }
         */
-        [HttpPost("registration")]
-        public async Task<IActionResult> Registration(string login, string password)
-        {
-            try
-            {
-                var user = await _userService.Registration(login, password);
-                return Ok(user);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { msg = ex.Message });
-            }
-        }
     }
 }

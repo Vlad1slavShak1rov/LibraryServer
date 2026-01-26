@@ -3,14 +3,18 @@ using LibraryServer.DTO;
 using LibraryServer.Model;
 using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
+using System.Security.Claims;
+using LibraryServer.Tools;
 namespace LibraryServer.Service
 {
     public class UserService
     {
         private readonly LibraryContext _context;
-        public UserService(LibraryContext context) 
+        private readonly JWTCreater _jwtCreater;
+        public UserService(LibraryContext context, JWTCreater jwtCreater) 
         {
             _context = context;
+            _jwtCreater = jwtCreater;
         }
 
         public async Task<List<User>> GetAll(string? sortedBy = null, string? searchText = null)
@@ -44,7 +48,7 @@ namespace LibraryServer.Service
             return await _context.Users.FirstOrDefaultAsync(u=>u.Id == id);
         }
 
-        public async Task<UserDTO?> Authorization(string login, string password)
+        public async Task<string> Authorization(string login, string password)
         {
             if (string.IsNullOrEmpty(login))
             {
@@ -63,25 +67,30 @@ namespace LibraryServer.Service
                 throw new Exception("The user is not registered!");
             }
 
-            var hashPassword = BCrypt.Net.BCrypt.Verify(user.Password, password);
+            var isValid = BCrypt.Net.BCrypt.Verify(password, user.Password);
 
-            if (!hashPassword)
+            if (!isValid)
             {
                 throw new Exception("Password is incorrect!");
             }
 
-            var userDto = new UserDTO()
+            if (!isValid)
             {
-                Id = user.Id,
-                Login = login,
-                Role = user.Role,
+                throw new Exception("Password is incorrect!");
+            }
 
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Login),
+                new Claim(ClaimTypes.Role, user.Role.ToString()),
             };
 
-            return userDto;
+            string jwt = _jwtCreater.JWTCreate(claims);
+            return jwt;
         }
 
-        public async Task<UserDTO?> Registration(string login, string password, Enums.Role? role = null)
+        public async Task<string> Registration(string login, string password, Enums.Role? role = null)
         {
             if (string.IsNullOrEmpty(login))
             {
@@ -112,14 +121,16 @@ namespace LibraryServer.Service
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
 
-            UserDTO userDTO = new UserDTO()
+            var claims = new[]
             {
-                Id = newUser.Id,
-                Login = login,
-                Role = newUser.Role,
+                new Claim(ClaimTypes.NameIdentifier, newUser.Id.ToString()),
+                new Claim(ClaimTypes.Name, login),
+                new Claim(ClaimTypes.Role, newUser.Role.ToString()),
             };
 
-            return userDTO;
+            string jwt = _jwtCreater.JWTCreate(claims);
+
+            return jwt;
         }
     }
 }
