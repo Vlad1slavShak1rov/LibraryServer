@@ -13,7 +13,7 @@ namespace LibraryServer.Model
         public string Description { get; set; }
         public bool InStock { get; set; }
         public float TotalRate { get; set;  }
-        public byte[]? Image { get; set; }
+        public string? ImagePath { get; set; }
 
         [ForeignKey("AuthorID")]
         public virtual Author Author { get; set; }
