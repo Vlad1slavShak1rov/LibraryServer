@@ -2,7 +2,7 @@
 using LibraryServer.DTO;
 using LibraryServer.Model;
 using Microsoft.EntityFrameworkCore;
-
+using BCrypt.Net;
 namespace LibraryServer.Service
 {
     public class UserService
@@ -48,26 +48,32 @@ namespace LibraryServer.Service
         {
             if (string.IsNullOrEmpty(login))
             {
-                throw new Exception("login is empty!");
+                throw new Exception("Login is empty!");
             }
 
             if (string.IsNullOrEmpty(password))
             {
-                throw new Exception("password is empty!");
+                throw new Exception("Password is empty!");
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u=>u.Login == login && u.Password == password);
+            var user = await _context.Users.FirstOrDefaultAsync(u=>u.Login == login);
 
             if(user == null)
             {
-                throw new Exception("The user is not registered or login and password is incorrect");
+                throw new Exception("The user is not registered!");
+            }
+
+            var hashPassword = BCrypt.Net.BCrypt.Verify(user.Password, password);
+
+            if (!hashPassword)
+            {
+                throw new Exception("Password is incorrect!");
             }
 
             var userDto = new UserDTO()
             {
                 Id = user.Id,
                 Login = login,
-                Password = password,
                 Role = user.Role,
 
             };
@@ -79,25 +85,27 @@ namespace LibraryServer.Service
         {
             if (string.IsNullOrEmpty(login))
             {
-                throw new Exception("login is empty!");
+                throw new Exception("Login is empty!");
             }
 
             if (string.IsNullOrEmpty(password))
             {
-                throw new Exception("password is empty!");
+                throw new Exception("Password is empty!");
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Login == login && u.Password == password);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Login == login);
 
             if (user != null)
             {
                 throw new Exception("User is already registered");
             }
 
+            var hashPassword = BCrypt.Net.BCrypt.HashPassword(password);
+
             var newUser = new User
             {
                 Login = login,
-                Password = password,
+                Password = hashPassword,
                 Role = role == null ? Enums.Role.User : role!.Value,
             };
 
@@ -108,7 +116,6 @@ namespace LibraryServer.Service
             {
                 Id = newUser.Id,
                 Login = login,
-                Password = password,
                 Role = newUser.Role,
             };
 
