@@ -43,9 +43,20 @@ namespace LibraryServer.Service
             return await query.ToListAsync();
         }
 
-        public async Task<User?> GetById(int? id)
+        public async Task<UserDTO?> GetById(int? id)
         {
-            return await _context.Users.FirstOrDefaultAsync(u=>u.Id == id);
+            var user =  await _context.Users.FirstOrDefaultAsync(u=>u.Id == id);
+
+            if (user == null) return null;
+
+            var userDto = new UserDTO()
+            {
+                Id = user.Id,
+                Login = user.Login,
+                Role = user.Role,
+            };
+
+            return userDto;
         }
 
         public async Task<string> Authorization(string login, string password)
@@ -131,6 +142,43 @@ namespace LibraryServer.Service
             string jwt = _jwtCreater.JWTCreate(claims);
 
             return jwt;
+        }
+
+        public async Task<string> UpdateLogin(string? login, int? id)
+        {
+            if(id is null || id == 0)
+            {
+                throw new Exception("Id was empty or null");
+            }
+
+            if (string.IsNullOrEmpty(login))
+            {
+                throw new Exception("Login was empty or null");
+            }
+
+            var users = await _context.Users.FindAsync(id);
+
+            if (users == null)
+            {
+                throw new Exception("User is not found");
+            }
+
+            users.Login = login;
+            _context.SaveChanges();
+
+            return login;
+        }
+
+        public async Task<bool> DeleteUser(int id)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id == id);
+
+            if(user == null) return false;
+        
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 }

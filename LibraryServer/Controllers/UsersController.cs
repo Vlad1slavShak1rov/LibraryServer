@@ -1,6 +1,7 @@
 ﻿using LibraryServer.DTO;
 using LibraryServer.Service;
 using LibraryServer.Tools;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,6 +25,7 @@ namespace LibraryServer.Controllers
             return Ok(list);
         }
 
+        [Authorize(Roles = "Librarian")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int? id)
         {
@@ -37,19 +39,12 @@ namespace LibraryServer.Controllers
                 return BadRequest(new {msg = "ID is not integer!" });
             }
 
-            var user = await _userService.GetById(id!.Value);
+            var userDto = await _userService.GetById(id!.Value);
 
-            if (user == null)
+            if (userDto == null)
             {
                 return NotFound(new { msg = "User not has in database!"});
             }
-
-            var userDto = new UserDTO()
-            {
-                Id = user.Id,
-                Login = user.Login,
-                Role = user.Role,
-            };
 
             return Ok(userDto);
         }
@@ -84,23 +79,28 @@ namespace LibraryServer.Controllers
         }
 
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UserDTO request)
+        [HttpPatch("swaplogin/{id}")]
+        public async Task<IActionResult> UpdateLogin(string? login, int? id)
         {
-            return Ok();
+            try
+            {
+                var newLogin = await UpdateLogin(login, id);
+                return Ok(new {login = newLogin});
+            } 
+            catch (Exception ex)
+            {
+                return BadRequest(new {msg = ex.Message});
+            }
         }
 
-
-        /*
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var deleted = await _userService.Delete(id);
+            var deleted = await _userService.DeleteUser(id);
             if (!deleted)
                 return NotFound();
 
-            return NoContent();
+            return Ok();
         }
-        */
     }
 }
