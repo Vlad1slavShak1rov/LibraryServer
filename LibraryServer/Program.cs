@@ -29,6 +29,18 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:8080")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -64,6 +76,7 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
+app.UseCors();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
