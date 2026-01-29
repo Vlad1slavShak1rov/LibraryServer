@@ -43,7 +43,7 @@ namespace LibraryServer.Controllers
         {
             try
             {
-                var book = await _bookService.AddBook();
+                var book = await _bookService.AddBook(addBookDTO);
                 return Ok(book);
             } 
             catch (Exception ex)

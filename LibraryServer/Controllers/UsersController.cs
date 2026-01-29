@@ -29,24 +29,15 @@ namespace LibraryServer.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int? id)
         {
-            if(id is null)
+            try
             {
-                return BadRequest(new {msg = "ID was null!"});
+                var userDto = await _userService.GetById(id);
+                return Ok(userDto);
             }
-
-            if(!int.TryParse(id.ToString(), out var idValue))
+            catch (Exception ex)
             {
-                return BadRequest(new {msg = "ID is not integer!" });
+                return BadRequest(new {msg = ex.Message});
             }
-
-            var userDto = await _userService.GetById(id!.Value);
-
-            if (userDto == null)
-            {
-                return NotFound(new { msg = "User not has in database!"});
-            }
-
-            return Ok(userDto);
         }
 
 

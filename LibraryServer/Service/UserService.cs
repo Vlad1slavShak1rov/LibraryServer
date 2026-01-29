@@ -50,9 +50,17 @@ namespace LibraryServer.Service
 
         public async Task<UserDTO?> GetById(int? id)
         {
+            if (id is null)
+            {
+                throw new ArgumentNullException("ID was null!");
+            }
+
             var user =  await _context.Users.FirstOrDefaultAsync(u=>u.Id == id);
 
-            if (user == null) return null;
+            if (user == null)
+            {
+                throw new Exception("User has not found");
+            }
 
             var userDto = new UserDTO()
             {
