@@ -1,4 +1,5 @@
-﻿using LibraryServer.Service;
+﻿using LibraryServer.DTO;
+using LibraryServer.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,30 +10,47 @@ namespace LibraryServer.Controllers
     [ApiController]
     public class BookController : ControllerBase
     {
-        private readonly UserService _userService;
-        public BookController(UserService userService)
+        private readonly BookService _bookService;
+        public BookController(BookService bookService)
         {
-            _userService = userService;
+            _bookService = bookService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll(string? searchText)
         {
-            var list = await _userService.GetAll(searchText);
+            var list = await _bookService.GetAll(searchText);
             return Ok(list);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int? id)
         {
-            return Ok();
+            try
+            {
+                var book = await _bookService.GetById(id);
+                return Ok(book);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ex.Message });
+            }
         }
 
         [Authorize(Roles = "Librarian")]
         [HttpPost]
-        public async Task<IActionResult> AddBook()
+        public async Task<IActionResult> AddBook(AddBookDTO addBookDTO)
         {
-            return Ok();
+            try
+            {
+                var book = await _bookService.AddBook();
+                return Ok(book);
+            } 
+            catch (Exception ex)
+            {
+                return BadRequest(new {msg = ex.Message});
+            }
+            
         }
 
         [Authorize(Roles = "Librarian")]

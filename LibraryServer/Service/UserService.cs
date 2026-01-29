@@ -106,7 +106,7 @@ namespace LibraryServer.Service
             return jwt;
         }
 
-        public async Task<string> Registration(string login, string password, Enums.Role? role = null)
+        public async Task<string> Registration(string login, string password)
         {
             if (string.IsNullOrEmpty(login))
             {
@@ -131,7 +131,7 @@ namespace LibraryServer.Service
             {
                 Login = login,
                 Password = hashPassword,
-                Role = role == null ? Enums.Role.User : role!.Value,
+                Role = Enums.Role.User,
             };
 
             await _context.Users.AddAsync(newUser);

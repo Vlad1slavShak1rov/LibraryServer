@@ -13,6 +13,8 @@ namespace LibraryServer.Model
         public DateTime DateOfBirth { get; set; }
         public DateTime? DateOfDeath { get; set; }
 
+        public string FullName { get => $"{SecondName} {FirstName} {LastName}"; }
+
         public virtual List<Book> Books { get; set; }
     }
 }
