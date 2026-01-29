@@ -51,11 +51,11 @@ namespace LibraryServer.Controllers
 
 
         [HttpPost("registration")]
-        public async Task<IActionResult> Registration(string login, string password)
+        public async Task<IActionResult> Registration([FromBody] RegistrationDTO registrationDTO)
         {
             try
             {
-                var token = await _userService.Registration(login, password);
+                var token = await _userService.Registration(registrationDTO.Login, registrationDTO.Password);
                 return Ok(new { token });
             }
             catch (Exception ex)
@@ -65,11 +65,11 @@ namespace LibraryServer.Controllers
         }
 
         [HttpGet("login")]
-        public async Task<IActionResult> Authorization(string login, string password)
+        public async Task<IActionResult> Authorization([FromBody] LoginRequestDTO loginRequestDTO )
         {
             try
             {
-                var token = await _userService.Authorization(login, password);
+                var token = await _userService.Authorization(loginRequestDTO.Login, loginRequestDTO.Password);
                 return Ok(new { token });
             }
             catch (Exception ex)
@@ -80,11 +80,11 @@ namespace LibraryServer.Controllers
 
 
         [HttpPatch("swaplogin/{id}")]
-        public async Task<IActionResult> UpdateLogin(string? login, int? id)
+        public async Task<IActionResult> UpdateLogin([FromBody] UpdateLoginDTO updateLogin, [FromRoute]int? id)
         {
             try
             {
-                var newLogin = await UpdateLogin(login, id);
+                var newLogin = await _userService.UpdateLogin(updateLogin.Login, id);
                 return Ok(new {login = newLogin});
             } 
             catch (Exception ex)
