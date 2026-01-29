@@ -19,6 +19,7 @@ builder.Services.AddDbContext<LibraryContext>(option =>
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<BookService>();
 builder.Services.AddScoped<CheckBookHelper>();
+builder.Services.AddScoped<FavoriteBookUserService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
