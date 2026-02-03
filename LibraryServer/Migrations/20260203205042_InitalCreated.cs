@@ -21,6 +21,7 @@ namespace LibraryServer.Migrations
                     LastName = table.Column<string>(type: "TEXT", nullable: false),
                     SecondName = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
+                    ImagePath = table.Column<string>(type: "TEXT", nullable: true),
                     DateOfBirth = table.Column<DateTime>(type: "TEXT", nullable: false),
                     DateOfDeath = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
@@ -56,7 +57,7 @@ namespace LibraryServer.Migrations
                     Description = table.Column<string>(type: "TEXT", nullable: false),
                     InStock = table.Column<bool>(type: "INTEGER", nullable: false),
                     TotalRate = table.Column<float>(type: "REAL", nullable: false),
-                    Image = table.Column<byte[]>(type: "BLOB", nullable: true)
+                    ImagePath = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {

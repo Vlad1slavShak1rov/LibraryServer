@@ -10,6 +10,7 @@ namespace LibraryServer.Model
         public string LastName { get; set; }
         public string SecondName { get; set; }
         public string Description { get; set; }
+        public string? ImagePath { get; set; }
         public DateTime DateOfBirth { get; set; }
         public DateTime? DateOfDeath { get; set; }
 

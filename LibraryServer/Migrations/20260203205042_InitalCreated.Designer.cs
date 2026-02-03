@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryServer.Migrations
 {
     [DbContext(typeof(LibraryContext))]
-    [Migration("20260122200505_InitalCreated")]
+    [Migration("20260203205042_InitalCreated")]
     partial class InitalCreated
     {
         /// <inheritdoc />
@@ -38,6 +38,9 @@ namespace LibraryServer.Migrations
 
                     b.Property<string>("FirstName")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ImagePath")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("LastName")
@@ -70,8 +73,8 @@ namespace LibraryServer.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<byte[]>("Image")
-                        .HasColumnType("BLOB");
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("InStock")
                         .HasColumnType("INTEGER");
