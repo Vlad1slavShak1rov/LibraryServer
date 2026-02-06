@@ -46,7 +46,7 @@ namespace LibraryServer.Controllers
         {
             try
             {
-                var token = await _userService.Registration(registrationDTO.Login, registrationDTO.Password);
+                var token = await _userService.Registration(registrationDTO);
                 return Ok(new { token });
             }
             catch (Exception ex)
@@ -55,7 +55,7 @@ namespace LibraryServer.Controllers
             }
         }
 
-        [HttpGet("login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Authorization([FromBody] LoginRequestDTO loginRequestDTO )
         {
             try

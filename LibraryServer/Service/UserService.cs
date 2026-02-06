@@ -114,8 +114,12 @@ namespace LibraryServer.Service
             return jwt;
         }
 
-        public async Task<string> Registration(string login, string password)
+        public async Task<string> Registration(RegistrationDTO registrationDTO)
         {
+            string login = registrationDTO.Login;
+            string password = registrationDTO.Password;
+            var role = registrationDTO.Role;
+
             if (string.IsNullOrEmpty(login))
             {
                 throw new Exception("Login is empty!");
@@ -139,7 +143,7 @@ namespace LibraryServer.Service
             {
                 Login = login,
                 Password = hashPassword,
-                Role = Enums.Role.User,
+                Role = role == null ? Enums.Role.User : role.Value,
             };
 
             await _context.Users.AddAsync(newUser);

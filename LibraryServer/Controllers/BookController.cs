@@ -44,20 +44,13 @@ namespace LibraryServer.Controllers
             try
             {
                 var book = await _bookService.AddBook(addBookDTO);
-                return Ok(book);
+                return Ok(book.Id);
             } 
             catch (Exception ex)
             {
                 return BadRequest(new {msg = ex.Message});
             }
             
-        }
-
-        [Authorize(Roles = "Librarian")]
-        [HttpPatch]
-        public async Task<IActionResult> UpdateNameBook()
-        {
-            return Ok();
         }
 
         [Authorize(Roles = "Librarian")]
