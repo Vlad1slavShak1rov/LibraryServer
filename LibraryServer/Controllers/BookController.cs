@@ -55,16 +55,47 @@ namespace LibraryServer.Controllers
 
         [Authorize(Roles = "Librarian")]
         [HttpPut]
-        public async Task<IActionResult> UpdateBook()
+        public async Task<IActionResult> UpdateBook(BookDTO bookDTO)
         {
-            return Ok();
+            try
+            {
+                var newBook = await _bookService.EditBook(bookDTO);
+                return Ok(newBook);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"{ex.Message}");
+            }
         }
 
         [Authorize(Roles = "Librarian")]
-        [HttpDelete]
-        public async Task<IActionResult> DeleteBook()
+        [HttpPatch]
+        public async Task<IActionResult> ChangeStatus([FromBody] BookStatusChangedDTO bookStatusChanged)
         {
-            return Ok();
+            try
+            {
+                var newBookStatus = await _bookService.ChangeStatusBook(bookStatusChanged);
+                return Ok(newBookStatus);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest($"{ex.Message}");
+            }
+        }
+
+        [Authorize(Roles = "Librarian")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBook([FromRoute] int id)
+        {
+            try
+            {
+                await _bookService.RemoveBook(id);
+                return Ok();
+            }
+            catch(Exception ex)
+            {
+                return BadRequest($"{ex.Message}");
+            }
         }
 
     }

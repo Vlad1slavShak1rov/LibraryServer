@@ -118,7 +118,7 @@ namespace LibraryServer.Service
             };
         }
 
-        public async Task<BookDTO> EditBook(EditBookDTO? editBook)
+        public async Task<BookDTO> EditBook(BookDTO? editBook)
         {
             if (editBook == null)
                 throw new ArgumentNullException(nameof(editBook));
@@ -149,8 +149,10 @@ namespace LibraryServer.Service
             };
         }
 
-        public async Task<BookStatusChangedDTO> ChangeStatusBook(BookStatusChangedDTO bookStatusChanged, int? id)
+        public async Task<BookStatusChangedDTO> ChangeStatusBook(BookStatusChangedDTO bookStatusChanged)
         {
+            int id = bookStatusChanged.Id;
+
             var book = await _checkBookHelper.ValidateBook(id);
 
             book.InStock = bookStatusChanged.InStock;
