@@ -106,6 +106,9 @@ namespace LibraryServer.Service
             await _context.Books.AddAsync(book);
             await _context.SaveChangesAsync();
 
+            AuthorService authorService = new(_context);
+            var author = await authorService.GetById(book.AuthorID);
+
             return new BookDTO()
             {
                 Id = book.Id,
@@ -114,7 +117,7 @@ namespace LibraryServer.Service
                 ImagePath = book.ImagePath,
                 InStock = true,
                 TotalRate = 0,
-                AuthorName = "AUTHOR SERVICE.GETNAME"
+                AuthorName = $"{author.SecondName} {author.FirstName} {author.LastName}"
             };
         }
 
