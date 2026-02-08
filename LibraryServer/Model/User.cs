@@ -10,6 +10,8 @@ namespace LibraryServer.Model
         public string Password { get; set;  }
         public Enums.Role Role { get; set; }
 
+        public virtual Teacher Teacher { get; set; }
+        public virtual Student Student { get; set; }
         public virtual List<BookReservation> BookReservations { get; set; }
         public virtual List<Events> Events { get; set; }
         public virtual List<Forum> Forums { get; set; }
