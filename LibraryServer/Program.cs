@@ -20,6 +20,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<BookService>();
 builder.Services.AddScoped<CheckBookHelper>();
 builder.Services.AddScoped<FavoriteBookUserService>();
+builder.Services.AddScoped<AuthorService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

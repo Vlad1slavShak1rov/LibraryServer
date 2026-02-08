@@ -17,7 +17,7 @@ namespace LibraryServer.Tools
         /// </summary>
         /// <param name="id">ID Book</param>
         /// <returns>Entity Book</returns>
-        /// <exception cref="Exception"></exception>
+        /// <exception cref="Exception">Throw exception when id was null or when book has not found</exception>
         public async Task<Book> ValidateBook(int? id)
         {
             if (id == null || id == 0)

@@ -16,7 +16,7 @@ namespace LibraryServer.Service
             _checkBookHelper = checkBookHelper;
         }
 
-        public async Task<List<BookDTO>> GetAll(string? searchText)
+        public async Task<List<BookDTO>> GetAll(string? searchText = null)
         {
             IQueryable<BookDTO> books = _context.Books
                .Include(b => b.Author)
