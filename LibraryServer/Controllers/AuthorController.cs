@@ -23,7 +23,7 @@ namespace LibraryServer.Controllers
             return Ok(await _authorService.GetAll(searchText, sortedBy));
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromBody] int id)
         {
             try
