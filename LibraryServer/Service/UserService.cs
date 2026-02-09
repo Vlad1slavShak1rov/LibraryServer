@@ -1,10 +1,11 @@
-﻿using LibraryServer.DbContext;
+﻿using BCrypt.Net;
+using LibraryServer.DbContext;
 using LibraryServer.DTO;
 using LibraryServer.Model;
-using Microsoft.EntityFrameworkCore;
-using BCrypt.Net;
-using System.Security.Claims;
 using LibraryServer.Tools;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 namespace LibraryServer.Service
 {
     public class UserService
@@ -72,6 +73,7 @@ namespace LibraryServer.Service
             return userDto;
         }
 
+        [AllowAnonymous]
         public async Task<string> Authorization(string login, string password)
         {
             if (string.IsNullOrEmpty(login))
@@ -114,6 +116,7 @@ namespace LibraryServer.Service
             return jwt;
         }
 
+        [AllowAnonymous]
         public async Task<string> Registration(RegistrationDTO registrationDTO)
         {
             string login = registrationDTO.Login;
@@ -142,7 +145,7 @@ namespace LibraryServer.Service
             var newUser = new User
             {
                 Login = login,
-                Password = hashPassword,
+                Password = "1",
                 Role = role == null ? Enums.Role.Student : role.Value,
             };
 

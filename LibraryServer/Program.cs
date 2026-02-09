@@ -30,6 +30,16 @@ builder.Services.AddSwaggerGen(c =>
         Title = "Library API",
         Version = "v1"
     });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "¬ведите JWT токен в формате: Bearer {token}"
+    });
+
 });
 
 builder.Services.AddCors(options =>
@@ -77,6 +87,9 @@ app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Library API v1");
     c.RoutePrefix = "swagger";
+    c.OAuthClientId("swagger-ui");
+    c.OAuthAppName("Swagger UI");
+    c.OAuthUsePkce();
 });
 
 app.UseCors();
