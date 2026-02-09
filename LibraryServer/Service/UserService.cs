@@ -143,21 +143,47 @@ namespace LibraryServer.Service
             {
                 Login = login,
                 Password = hashPassword,
-                Role = role == null ? Enums.Role.User : role.Value,
+                Role = role == null ? Enums.Role.Student : role.Value,
             };
 
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
 
-            var claims = new[]
+            if(newUser.Role == Enums.Role.Student)
             {
+                var student = new Student()
+                {
+                    UserID = newUser.Id,
+                    FirstName = "",
+                    SecondName = "",
+                    LastName = "",
+                    ClassNum = "",
+                };
+
+                await AddEntity<Student>(student);
+            }
+            else if (newUser.Role == Enums.Role.Teacher)
+            {
+                var teacher = new Teacher()
+                {
+                    UserID = newUser.Id,
+                    FirstName = "",
+                    SecondName = "",
+                    LastName = "",
+                    Contact = "",
+                };
+
+                await AddEntity<Teacher>(teacher);
+            }
+
+                var claims = new[]
+                {
                 new Claim(ClaimTypes.NameIdentifier, newUser.Id.ToString()),
                 new Claim(ClaimTypes.Name, login),
                 new Claim(ClaimTypes.Role, newUser.Role.ToString()),
             };
 
             string jwt = _jwtCreater.JWTCreate(claims);
-
             return jwt;
         }
 
@@ -184,6 +210,15 @@ namespace LibraryServer.Service
             _context.SaveChanges();
 
             return login;
+        }
+
+        public async Task AddEntity<T>(T entity) where T : class
+        {
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity));
+
+            _context.Set<T>().Add(entity);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> DeleteUser(int id)

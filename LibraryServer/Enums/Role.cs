@@ -2,6 +2,8 @@
 {
     public enum Role
     {
-        User, Librarian, Teacher
+        Librarian = 0,
+        Teacher = 1,
+        Student = 2, 
     }
 }
