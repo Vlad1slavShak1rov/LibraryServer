@@ -11,7 +11,7 @@ namespace LibraryServer.Model
         public string FirstName { get; set; }
         public string SecondName { get; set; }
         public string LastName { get; set; }
-        public int ClassNum { get; set;  }
+        public string ClassNum { get; set;  }
 
         [ForeignKey("UserID")]
         public virtual User User { get; set; }
