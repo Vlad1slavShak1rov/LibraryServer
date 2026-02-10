@@ -9,6 +9,7 @@ namespace LibraryServer.Model
         public string Login { get;set;  }
         public string Password { get; set;  }
         public Enums.Role Role { get; set; }
+        public bool IsActive { get; set; }
 
         public virtual Teacher Teacher { get; set; }
         public virtual Student Student { get; set; }

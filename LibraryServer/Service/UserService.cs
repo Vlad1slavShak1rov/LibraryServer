@@ -20,12 +20,15 @@ namespace LibraryServer.Service
 
         public async Task<List<UserDTO>> GetAll(string? sortedBy = null, string? searchText = null)
         {
-            IQueryable<UserDTO> query = _context.Users.Select(u=> new UserDTO
-            {
-                Id = u.Id,
-                Login = u.Login,
-                Role = u.Role
-            });
+            IQueryable<UserDTO> query = _context.Users
+                .Where(u=>u.Role == Enums.Role.Student)
+                .Select(u=> new UserDTO
+                {
+                    Id = u.Id,
+                    Login = u.Login,
+                    Role = u.Role
+                });
+
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
@@ -116,77 +119,68 @@ namespace LibraryServer.Service
             return jwt;
         }
 
-        [AllowAnonymous]
         public async Task<string> Registration(RegistrationDTO registrationDTO)
         {
             string login = registrationDTO.Login;
             string password = registrationDTO.Password;
-            var role = registrationDTO.Role;
+            Enums.Role? role = registrationDTO.Role;
 
             if (string.IsNullOrEmpty(login))
-            {
-                throw new Exception("Login is empty!");
-            }
+                throw new Exception("Login is required!");
 
             if (string.IsNullOrEmpty(password))
-            {
-                throw new Exception("Password is empty!");
-            }
+                throw new Exception("Password is required!");
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Login == login);
+            var existingUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Login == login);
 
-            if (user != null)
-            {
+            if (existingUser != null)
                 throw new Exception("User is already registered");
-            }
-
-            var hashPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
             var newUser = new User
             {
                 Login = login,
-                Password = "1",
-                Role = role == null ? Enums.Role.Student : role.Value,
+                Password = BCrypt.Net.BCrypt.HashPassword(password),
+                Role = role ?? Enums.Role.Student,
+                IsActive = false, 
             };
 
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
 
-            if(newUser.Role == Enums.Role.Student)
+            switch (newUser.Role)
             {
-                var student = new Student()
-                {
-                    UserID = newUser.Id,
-                    FirstName = "",
-                    SecondName = "",
-                    LastName = "",
-                    ClassNum = "",
-                };
+                case Enums.Role.Student:
+                    var student = new Student
+                    {
+                        UserID = newUser.Id,
+                        IsProfileComplete = false
+                    };
+                    await _context.Students.AddAsync(student);
+                    break;
 
-                await AddEntity<Student>(student);
-            }
-            else if (newUser.Role == Enums.Role.Teacher)
-            {
-                var teacher = new Teacher()
-                {
-                    UserID = newUser.Id,
-                    FirstName = "",
-                    SecondName = "",
-                    LastName = "",
-                    Contact = "",
-                };
-
-                await AddEntity<Teacher>(teacher);
+                case Enums.Role.Teacher:
+                    var teacher = new Teacher
+                    {
+                        UserID = newUser.Id,
+                        IsProfileComplete = false
+                    };
+                    await _context.Teachers.AddAsync(teacher);
+                    break;
             }
 
-                var claims = new[]
-                {
+            await _context.SaveChangesAsync();
+
+            var claims = new[]
+            {
                 new Claim(ClaimTypes.NameIdentifier, newUser.Id.ToString()),
                 new Claim(ClaimTypes.Name, login),
                 new Claim(ClaimTypes.Role, newUser.Role.ToString()),
+                new Claim("IsProfileComplete", "false")
             };
 
             string jwt = _jwtCreater.JWTCreate(claims);
+
             return jwt;
         }
 
@@ -215,15 +209,7 @@ namespace LibraryServer.Service
             return login;
         }
 
-        public async Task AddEntity<T>(T entity) where T : class
-        {
-            if (entity == null)
-                throw new ArgumentNullException(nameof(entity));
-
-            _context.Set<T>().Add(entity);
-            await _context.SaveChangesAsync();
-        }
-
+       
         public async Task<bool> DeleteUser(int id)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u=>u.Id == id);

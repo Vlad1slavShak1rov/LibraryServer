@@ -12,6 +12,7 @@ namespace LibraryServer.Model
         public string SecondName { get; set; }
         public string LastName { get; set; }
         public string Contact { get; set;  }
+        public bool IsProfileComplete { get; set; }
 
 
         [ForeignKey("UserID")]

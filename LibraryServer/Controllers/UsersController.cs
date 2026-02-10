@@ -40,7 +40,7 @@ namespace LibraryServer.Controllers
             }
         }
 
-
+        [AllowAnonymous]
         [HttpPost("registration")]
         public async Task<IActionResult> Registration([FromBody] RegistrationDTO registrationDTO)
         {
