@@ -142,7 +142,6 @@ namespace LibraryServer.Service
                 Login = login,
                 Password = BCrypt.Net.BCrypt.HashPassword(password),
                 Role = role ?? Enums.Role.Student,
-                IsActive = false, 
             };
 
             await _context.Users.AddAsync(newUser);

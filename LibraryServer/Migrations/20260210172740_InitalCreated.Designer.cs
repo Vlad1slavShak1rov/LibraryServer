@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryServer.Migrations
 {
     [DbContext(typeof(LibraryContext))]
-    [Migration("20260203205042_InitalCreated")]
+    [Migration("20260210172740_InitalCreated")]
     partial class InitalCreated
     {
         /// <inheritdoc />
@@ -253,6 +253,78 @@ namespace LibraryServer.Migrations
                     b.ToTable("ReviewBooks");
                 });
 
+            modelBuilder.Entity("LibraryServer.Model.Student", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ClassNum")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsProfileComplete")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SecondName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserID")
+                        .IsUnique();
+
+                    b.ToTable("Students");
+                });
+
+            modelBuilder.Entity("LibraryServer.Model.Teacher", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Contact")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsProfileComplete")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SecondName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserID")
+                        .IsUnique();
+
+                    b.ToTable("Teachers");
+                });
+
             modelBuilder.Entity("LibraryServer.Model.Test", b =>
                 {
                     b.Property<int>("Id")
@@ -423,6 +495,28 @@ namespace LibraryServer.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("LibraryServer.Model.Student", b =>
+                {
+                    b.HasOne("LibraryServer.Model.User", "User")
+                        .WithOne("Student")
+                        .HasForeignKey("LibraryServer.Model.Student", "UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("LibraryServer.Model.Teacher", b =>
+                {
+                    b.HasOne("LibraryServer.Model.User", "User")
+                        .WithOne("Teacher")
+                        .HasForeignKey("LibraryServer.Model.Teacher", "UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("LibraryServer.Model.Test", b =>
                 {
                     b.HasOne("LibraryServer.Model.User", "User")
@@ -485,6 +579,12 @@ namespace LibraryServer.Migrations
                     b.Navigation("Forums");
 
                     b.Navigation("ReviewBooks");
+
+                    b.Navigation("Student")
+                        .IsRequired();
+
+                    b.Navigation("Teacher")
+                        .IsRequired();
 
                     b.Navigation("Tests");
 
