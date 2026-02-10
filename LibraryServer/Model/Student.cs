@@ -8,10 +8,10 @@ namespace LibraryServer.Model
         [Key]
         public int Id { get; set; }
         public int UserID { get; set; }
-        public string FirstName { get; set; }
-        public string SecondName { get; set; }
-        public string LastName { get; set; }
-        public string ClassNum { get; set;  }
+        public string FirstName { get; set; } = string.Empty;
+        public string SecondName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string ClassNum { get; set;  } = string.Empty;
         public bool IsProfileComplete { get; set; }
 
         [ForeignKey("UserID")]
