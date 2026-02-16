@@ -25,7 +25,7 @@ namespace LibraryServer.Service
                 .ToListAsync();
         }
 
-        public async Task<List<BookUserDTO>> GetBookByUser(int? id)
+        public async Task<List<Book>> GetBookByUser(int? id)
         {
             if(id == null || id == 0)
             {
@@ -33,15 +33,11 @@ namespace LibraryServer.Service
             }
 
             var list = await _libraryContext.UserBooks
-                .Where(f=>f.UserId == id)
-                .Select(f=>new BookUserDTO()
-                {
-                    Id = f.Id,
-                    UserID = f.UserId,
-                    BookId = f.BookId,
-                })
+                .Include(b=>b.Book)
+                .Where(b=>b.UserId == id)
+                .Select(b=>b.Book)
                 .ToListAsync();
-
+                
             return list;
         }
 
@@ -78,7 +74,6 @@ namespace LibraryServer.Service
             {
                 throw new Exception("Favorite book for user was not found!");
             }
-
 
             _libraryContext.UserBooks.Remove(userBook);
             await _libraryContext.SaveChangesAsync();

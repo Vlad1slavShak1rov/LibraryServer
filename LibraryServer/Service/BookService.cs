@@ -16,7 +16,7 @@ namespace LibraryServer.Service
             _checkBookHelper = checkBookHelper;
         }
 
-        public async Task<List<BookDTO>> GetAll(string? searchText = null)
+        public async Task<List<BookDTO>> GetAll(string? searchText = null, string? sortedBy = null)
         {
             IQueryable<BookDTO> books = _context.Books
                .Include(b => b.Author)
@@ -32,9 +32,20 @@ namespace LibraryServer.Service
                    ImagePath = b.ImagePath,
                });
 
+            if(!string.IsNullOrEmpty(sortedBy))
+            {
+                books = sortedBy switch
+                {
+                    "byBookName" => books.OrderBy(b => b.Title),
+                    "byAuthor" => books.OrderBy(b=>b.AuthorName),
+                    "byInStock" => books.OrderBy(b=>b.InStock),
+                    _ => books.OrderBy(b => b.Id),
+                };
+            }
+
             if (!string.IsNullOrEmpty(searchText))
             {
-                books = books.Where(b => b.Genre.StartsWith(searchText) || b.Title.StartsWith(searchText) || b.AuthorName.Contains(searchText));
+                books = books.Where(b => b.Genre.StartsWith(searchText.ToLower()) || b.Title.StartsWith(searchText.ToLower()));
             }
 
             return await books.ToListAsync();

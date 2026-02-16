@@ -101,7 +101,7 @@ namespace LibraryServer.Service
                 throw new Exception("Date Of Birth was empty!");
             }
 
-            var existAuthor = await _context.Authors.FirstOrDefaultAsync(a=>a.FullName == $"{author.SecondName} {author.FirstName} {author.LastName}");
+            var existAuthor = await _context.Authors.FirstOrDefaultAsync(a => $"{a.SecondName} {a.FirstName} {a.LastName}" == $"{author.SecondName} {author.FirstName} {author.LastName}");
             if (existAuthor != null)
             {
                 throw new Exception("This author has already been added!");

@@ -119,7 +119,7 @@ namespace LibraryServer.Service
             return jwt;
         }
 
-        public async Task<string> Registration(RegistrationDTO registrationDTO)
+        public async Task<bool> Registration(RegistrationDTO registrationDTO)
         {
             string login = registrationDTO.Login;
             string password = registrationDTO.Password;
@@ -178,9 +178,7 @@ namespace LibraryServer.Service
                 new Claim("IsProfileComplete", "false")
             };
 
-            string jwt = _jwtCreater.JWTCreate(claims);
-
-            return jwt;
+            return true;
         }
 
         public async Task<string> UpdateLogin(string? login, int? id)

@@ -46,12 +46,12 @@ namespace LibraryServer.Controllers
         {
             try
             {
-                var token = await _userService.Registration(registrationDTO);
-                return Ok(new { token });
+                var isSuccessfully = await _userService.Registration(registrationDTO);
+                return Ok(new { isSuccessfully });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { msg = ex.Message });
+                return BadRequest(new { isSuccessfully = false, msg = ex.Message });
             }
         }
 
