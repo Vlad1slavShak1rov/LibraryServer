@@ -114,6 +114,31 @@ builder.Services.AddScoped<JWTCreater>();
 
 var app = builder.Build();
 
+var webSocketOptions = new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromMinutes(2)
+};
+
+app.UseWebSockets(webSocketOptions);
+
+app.MapControllers();
+app.Map("/ws/chat", async (HttpContext context) =>
+{
+    if (context.WebSockets.IsWebSocketRequest)
+    {
+        var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+        await ChatHandler.HandleAsync(webSocket);
+    }
+    else
+    {
+        context.Response.StatusCode = 400;
+    }
+});
+
+
+app.UseWebSockets(webSocketOptions);
+
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
