@@ -124,15 +124,22 @@ app.UseWebSockets(webSocketOptions);
 app.MapControllers();
 app.Map("/ws/chat", async (HttpContext context) =>
 {
-    if (context.WebSockets.IsWebSocketRequest)
-    {
-        var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-        await ChatHandler.HandleAsync(webSocket);
-    }
-    else
+    if (!context.WebSockets.IsWebSocketRequest)
     {
         context.Response.StatusCode = 400;
+        return;
     }
+
+    var userId = int.Parse(context.Request.Query["userId"]);
+    var forumId = int.Parse(context.Request.Query["forumId"]);
+
+    var socket = await context.WebSockets.AcceptWebSocketAsync();
+
+    await ChatHandler.HandleAsync(
+        socket,
+        userId,
+        forumId,
+        app.Services);
 });
 
 

@@ -17,9 +17,9 @@ namespace LibraryServer.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll(string? searchText)
+        public async Task<IActionResult> GetAll(string? searchText, string? sortedBy)
         {
-            var list = await _bookService.GetAll(searchText);
+            var list = await _bookService.GetAll(searchText, sortedBy);
             return Ok(list);
         }
 

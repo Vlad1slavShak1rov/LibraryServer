@@ -61,14 +61,14 @@ namespace LibraryServer.Service
             return bookUserDTO;
         }
 
-        public async Task<bool> RemoveFavoriteBook(int? id)
+        public async Task<bool> RemoveFavoriteBook(int? userId, int? bookId)
         {
-            if(id == null || id == 0)
+            if(bookId == null || bookId == 0 || userId == null || userId == 0)
             {
                 throw new ArgumentNullException("Id was null!");
             }
 
-            var userBook = await _libraryContext.UserBooks.FindAsync(id);
+            var userBook = await _libraryContext.UserBooks.FirstOrDefaultAsync(f=>f.UserId == userId && f.BookId == bookId);
             
             if(userBook == null)
             {
