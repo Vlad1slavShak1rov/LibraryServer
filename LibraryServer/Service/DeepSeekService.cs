@@ -3,7 +3,6 @@ using System.Text.Json;
 
 namespace LibraryServer.Service
 {
-    // Модели (оставляем как есть)
     public class Question
     {
         public int Number { get; set; }
