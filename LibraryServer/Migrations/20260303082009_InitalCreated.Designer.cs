@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryServer.Migrations
 {
     [DbContext(typeof(LibraryContext))]
-    [Migration("20260210182204_InitalCreated")]
+    [Migration("20260303082009_InitalCreated")]
     partial class InitalCreated
     {
         /// <inheritdoc />
@@ -202,6 +202,40 @@ namespace LibraryServer.Migrations
                     b.ToTable("ForumMessages");
                 });
 
+            modelBuilder.Entity("LibraryServer.Model.QuestionTest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CorrectAnswer")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Explanation")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("INTEGER");
+
+                    b.PrimitiveCollection<string>("Options")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TestId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TestId");
+
+                    b.ToTable("QuestionTests");
+                });
+
             modelBuilder.Entity("LibraryServer.Model.QuotesBooks", b =>
                 {
                     b.Property<int>("Id")
@@ -220,6 +254,40 @@ namespace LibraryServer.Migrations
                     b.HasIndex("BookId");
 
                     b.ToTable("QuotesBooks");
+                });
+
+            modelBuilder.Entity("LibraryServer.Model.ResultTest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSuccess")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Score")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TestId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TestId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ResultTests");
                 });
 
             modelBuilder.Entity("LibraryServer.Model.ReviewBook", b =>
@@ -331,14 +399,11 @@ namespace LibraryServer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Subject")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Score")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -465,6 +530,17 @@ namespace LibraryServer.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("LibraryServer.Model.QuestionTest", b =>
+                {
+                    b.HasOne("LibraryServer.Model.Test", "Test")
+                        .WithMany("Questions")
+                        .HasForeignKey("TestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Test");
+                });
+
             modelBuilder.Entity("LibraryServer.Model.QuotesBooks", b =>
                 {
                     b.HasOne("LibraryServer.Model.Book", "Book")
@@ -474,6 +550,25 @@ namespace LibraryServer.Migrations
                         .IsRequired();
 
                     b.Navigation("Book");
+                });
+
+            modelBuilder.Entity("LibraryServer.Model.ResultTest", b =>
+                {
+                    b.HasOne("LibraryServer.Model.Test", "Test")
+                        .WithMany("ResultTests")
+                        .HasForeignKey("TestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LibraryServer.Model.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Test");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("LibraryServer.Model.ReviewBook", b =>
@@ -519,13 +614,9 @@ namespace LibraryServer.Migrations
 
             modelBuilder.Entity("LibraryServer.Model.Test", b =>
                 {
-                    b.HasOne("LibraryServer.Model.User", "User")
+                    b.HasOne("LibraryServer.Model.User", null)
                         .WithMany("Tests")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("LibraryServer.Model.UserBook", b =>
@@ -566,6 +657,13 @@ namespace LibraryServer.Migrations
             modelBuilder.Entity("LibraryServer.Model.Forum", b =>
                 {
                     b.Navigation("ForumMessages");
+                });
+
+            modelBuilder.Entity("LibraryServer.Model.Test", b =>
+                {
+                    b.Navigation("Questions");
+
+                    b.Navigation("ResultTests");
                 });
 
             modelBuilder.Entity("LibraryServer.Model.User", b =>

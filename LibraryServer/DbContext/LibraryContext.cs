@@ -22,5 +22,7 @@ namespace LibraryServer.DbContext
         public virtual DbSet<UserBook> UserBooks { get; set; }
         public virtual DbSet<Teacher> Teachers { get; set; }
         public virtual DbSet<Student> Students { get; set; }
+        public virtual DbSet<ResultTest> ResultTests { get; set; }
+        public virtual DbSet<QuestionTest> QuestionTests { get; set; }
     }
 }

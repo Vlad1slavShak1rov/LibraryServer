@@ -24,7 +24,7 @@ builder.Services.AddScoped<FavoriteBookUserService>();
 builder.Services.AddScoped<AuthorService>();
 builder.Services.AddScoped<TeacherService>();
 builder.Services.AddScoped<TestService>();
-builder.Services.AddScoped<DeepSeekService>();
+builder.Services.AddScoped<OpenRouteService>();
 
 builder.Services.AddEndpointsApiExplorer();
 

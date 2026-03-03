@@ -1,31 +1,17 @@
-﻿using System.Text;
+﻿using LibraryServer.DTO;
+using LibraryServer.Model;
+using System.Text;
 using System.Text.Json;
 
 namespace LibraryServer.Service
 {
-    public class Question
-    {
-        public int Number { get; set; }
-        public string Text { get; set; }
-        public List<string> Options { get; set; }
-        public int CorrectAnswer { get; set; }
-        public string Explanation { get; set; }
-    }
-
-    public class JsonTest
-    {
-        public string Subject { get; set; }
-        public List<Question> Questions { get; set; }
-    }
-
-    public class DeepSeekService
+    public class OpenRouteService
     {
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
-
         private const string OpenRouterApiUrl = "https://openrouter.ai/api/v1/chat/completions";
 
-        public DeepSeekService(IConfiguration configuration)
+        public OpenRouteService(IConfiguration configuration)
         {
             _apiKey = configuration["OpenRouteApi"];
 
@@ -40,7 +26,7 @@ namespace LibraryServer.Service
             _httpClient.DefaultRequestHeaders.Add("X-Title", "School Test Generator");
         }
 
-        public async Task<JsonTest> GenerateTestAsync(string topic)
+        public async Task<Test> GenerateTestAsync(string topic)
         {
             try
             {
@@ -123,14 +109,14 @@ namespace LibraryServer.Service
                 var cleanedContent = CleanJsonResponse(content);
 
 
-                var test = JsonSerializer.Deserialize<JsonTest>(cleanedContent, new JsonSerializerOptions
+                var test = JsonSerializer.Deserialize<Test>(cleanedContent, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });
 
-                return test ?? new JsonTest { Subject = topic, Questions = new List<Question>() };
+                return test ?? new Test { Subject = topic, Questions = new List<QuestionTest>() };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

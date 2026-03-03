@@ -167,9 +167,8 @@ namespace LibraryServer.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: false),
-                    Score = table.Column<int>(type: "INTEGER", nullable: false)
+                    Subject = table.Column<string>(type: "TEXT", nullable: false),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -178,8 +177,7 @@ namespace LibraryServer.Migrations
                         name: "FK_Tests_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -315,6 +313,60 @@ namespace LibraryServer.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "QuestionTests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TestId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Number = table.Column<int>(type: "INTEGER", nullable: false),
+                    Text = table.Column<string>(type: "TEXT", nullable: false),
+                    Options = table.Column<string>(type: "TEXT", nullable: false),
+                    CorrectAnswer = table.Column<int>(type: "INTEGER", nullable: false),
+                    Explanation = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QuestionTests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_QuestionTests_Tests_TestId",
+                        column: x => x.TestId,
+                        principalTable: "Tests",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ResultTests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    TestId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: false),
+                    Score = table.Column<int>(type: "INTEGER", nullable: true),
+                    IsSuccess = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ResultTests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ResultTests_Tests_TestId",
+                        column: x => x.TestId,
+                        principalTable: "Tests",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ResultTests_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_BookReservations_BookId",
                 table: "BookReservations",
@@ -351,9 +403,24 @@ namespace LibraryServer.Migrations
                 column: "CreaterID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_QuestionTests_TestId",
+                table: "QuestionTests",
+                column: "TestId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_QuotesBooks_BookId",
                 table: "QuotesBooks",
                 column: "BookId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ResultTests_TestId",
+                table: "ResultTests",
+                column: "TestId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ResultTests_UserId",
+                table: "ResultTests",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ReviewBooks_BookId",
@@ -406,7 +473,13 @@ namespace LibraryServer.Migrations
                 name: "ForumMessages");
 
             migrationBuilder.DropTable(
+                name: "QuestionTests");
+
+            migrationBuilder.DropTable(
                 name: "QuotesBooks");
+
+            migrationBuilder.DropTable(
+                name: "ResultTests");
 
             migrationBuilder.DropTable(
                 name: "ReviewBooks");
@@ -418,13 +491,13 @@ namespace LibraryServer.Migrations
                 name: "Teachers");
 
             migrationBuilder.DropTable(
-                name: "Tests");
-
-            migrationBuilder.DropTable(
                 name: "UserBooks");
 
             migrationBuilder.DropTable(
                 name: "Forums");
+
+            migrationBuilder.DropTable(
+                name: "Tests");
 
             migrationBuilder.DropTable(
                 name: "Books");

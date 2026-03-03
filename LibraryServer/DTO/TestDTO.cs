@@ -1,9 +1,11 @@
-﻿namespace LibraryServer.DTO
+﻿using LibraryServer.Model;
+
+namespace LibraryServer.DTO
 {
-    public class TestDTO
+    public class TestDto
     {
-        public int UserId { get; set; }
-        public string Description { get; set; }
-        public int Score { get; set; }
+        public int Id { get; set; }
+        public string Subject { get; set; }
+        public virtual List<QuestionTest> Questions { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using LibraryServer.DTO;
 using LibraryServer.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryServer.Controllers
@@ -8,7 +9,6 @@ namespace LibraryServer.Controllers
     [Route("api/[controller]")]
     public class TestController : Controller
     {
-
         private readonly TestService _testService;
 
         public TestController(TestService testService)
@@ -16,13 +16,18 @@ namespace LibraryServer.Controllers
             _testService = testService;
         }
 
+        public async Task<IActionResult> GetAll(string? sortedBy = null, int? userId = null)
+        {
+            return Ok(await _testService.GetAll(sortedBy, userId));
+        }
 
+        [Authorize(Roles = "Librian, Teacher, Student")]
         [HttpPost("create")]
-        public async Task<IActionResult> CreateTest([FromBody]string topic)
+        public async Task<IActionResult> CreateTest([FromBody]CreateTestDTO createTest)
         {
             try
             {
-                var test = await _testService.CreateTest(topic);
+                var test = await _testService.CreateTest(createTest);
                 return Ok(test);
             }
             catch (Exception ex)
@@ -31,29 +36,32 @@ namespace LibraryServer.Controllers
             }
         }
 
-        [HttpPost("save")]
-        public async Task<IActionResult> SaveTest([FromBody] TestDTO testDTO)
+        [Authorize(Roles = "Librian, Teacher, Student")]
+        [HttpGet("get-test")]
+        public async Task<IActionResult> GetTestById(int? testId)
         {
             try
             {
-                return Ok();
-            }
-            catch (Exception ex)
+                var test = await _testService.GetById(testId);
+                return Ok(test);
+
+            } catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
 
-        [HttpGet("byUser")]
-        public async Task<IActionResult> GetTestsByUserId([FromBody] int userId)
+        [Authorize(Roles = "Librian, Teacher, Student")]
+        [HttpPost("send-test")]
+        public async Task<IActionResult> CheckResult(SolvedTestDto solvedTest)
         {
             try
             {
-                return Ok();
-            }
-            catch (Exception ex)
+                var result = await _testService.TestVerification(solvedTest);
+                return Ok(result);
+            } catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest($"{ex.Message}");
             }
         }
     }
