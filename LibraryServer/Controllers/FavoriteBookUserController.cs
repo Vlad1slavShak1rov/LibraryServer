@@ -65,11 +65,11 @@ namespace LibraryServer.Controllers
 
         [Authorize(Roles = "User, Librarian, Teacher")]
         [HttpDelete]
-        public async Task<IActionResult> RemoveFavourite([FromBody] int userId, [FromBody] int bookId)
+        public async Task<IActionResult> RemoveFavourite([FromBody] RemoveFavouriteRequestDTO? removeFavouriteRequestDTO)
         {
             try
             {
-                await _favoriteBookUserService.RemoveFavoriteBook(userId,bookId);
+                await _favoriteBookUserService.RemoveFavoriteBook(removeFavouriteRequestDTO);
                 return Ok();
             } catch (Exception ex)
             {

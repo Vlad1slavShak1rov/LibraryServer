@@ -23,6 +23,8 @@ builder.Services.AddScoped<CheckBookHelper>();
 builder.Services.AddScoped<FavoriteBookUserService>();
 builder.Services.AddScoped<AuthorService>();
 builder.Services.AddScoped<TeacherService>();
+builder.Services.AddScoped<TestService>();
+builder.Services.AddScoped<DeepSeekService>();
 
 builder.Services.AddEndpointsApiExplorer();
 

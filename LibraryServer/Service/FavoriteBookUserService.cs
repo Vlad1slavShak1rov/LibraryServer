@@ -61,8 +61,16 @@ namespace LibraryServer.Service
             return bookUserDTO;
         }
 
-        public async Task<bool> RemoveFavoriteBook(int? userId, int? bookId)
+        public async Task<bool> RemoveFavoriteBook(RemoveFavouriteRequestDTO? removeFavouriteRequestDTO)
         {
+            if(removeFavouriteRequestDTO == null)
+            {
+                throw new ArgumentNullException("RemoveFavouriteRequset was null!");
+            }
+
+            int? bookId = removeFavouriteRequestDTO.BookId;
+            int? userId = removeFavouriteRequestDTO.UserId;
+
             if(bookId == null || bookId == 0 || userId == null || userId == 0)
             {
                 throw new ArgumentNullException("Id was null!");
