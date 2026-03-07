@@ -1,4 +1,5 @@
-﻿using LibraryServer.DTO;
+﻿using LibraryServer.DbContext;
+using LibraryServer.DTO;
 using LibraryServer.Model;
 using System.Text;
 using System.Text.Json;
@@ -10,12 +11,13 @@ namespace LibraryServer.Service
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
         private const string OpenRouterApiUrl = "https://openrouter.ai/api/v1/chat/completions";
-
+        private readonly LibraryContext _context;
         public OpenRouteService(IConfiguration configuration)
         {
             _apiKey = configuration["OpenRouteApi"];
 
             _httpClient = new HttpClient();
+            _context = new LibraryContext();
 
             if (!string.IsNullOrEmpty(_apiKey))
             {
@@ -26,10 +28,12 @@ namespace LibraryServer.Service
             _httpClient.DefaultRequestHeaders.Add("X-Title", "School Test Generator");
         }
 
-        public async Task<Test> GenerateTestAsync(string topic)
+        public async Task<Test> GenerateTestAsync(int bookId, int questQuantity)
         {
             try
             {
+                BookService bookService = new(_context, new Tools.CheckBookHelper(_context));
+                var book = await bookService.GetById(bookId);
                 var requestBody = new
                 {
                     model = "openrouter/free",
@@ -39,18 +43,18 @@ namespace LibraryServer.Service
                         new
                         {
                             role = "system",
-                            content = @"Ты - опытный филолог. Генерируешь тесты по литературе и русскому языку.
+                            content = $@"Ты - опытный филолог. Генерируешь тесты по литературе и русскому языку.
 
                             ТВОЯ ЗАДАЧА:
-                            Создай тест из 5 вопросов. Каждый вопрос должен проверять знание темы.
+                            Создай тест из {questQuantity} вопросов. Каждый вопрос должен проверять знание темы.
 
                             ТРЕБОВАНИЯ К ФОРМАТУ:
                             Верни ТОЛЬКО JSON (без лишнего текста) в такой структуре:
                     
-                            {
+                            {{
                               ""subject"": ""Литература"",
                               ""questions"": [
-                                {
+                                {{
                                   ""number"": 1,
                                   ""text"": ""Текст вопроса"",
                                   ""options"": [
@@ -61,9 +65,9 @@ namespace LibraryServer.Service
                                   ],
                                   ""correctAnswer"": 0,
                                   ""explanation"": ""Почему этот ответ правильный""
-                                }
+                                }}
                               ]
-                            }
+                            }}
 
                             ПРАВИЛА:
                             - correctAnswer: 0 = первый вариант, 1 = второй, 2 = третий, 3 = четвертый
@@ -74,7 +78,7 @@ namespace LibraryServer.Service
                         new
                         {
                             role = "user",
-                            content = $"Создай тест по теме: {topic} для 5 класса"
+                            content = $"Создай тест по теме: {book.Title} для 5 класса"
                         }
                     },
                     temperature = 0.3,
@@ -114,7 +118,7 @@ namespace LibraryServer.Service
                     PropertyNameCaseInsensitive = true
                 });
 
-                return test ?? new Test { Subject = topic, Questions = new List<QuestionTest>() };
+                return test ?? new Test { Subject = book.Title, Questions = new List<QuestionTest>() };
             }
             catch (Exception)
             {

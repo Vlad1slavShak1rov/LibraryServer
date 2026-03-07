@@ -396,6 +396,9 @@ namespace LibraryServer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("BookId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Subject")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -404,6 +407,8 @@ namespace LibraryServer.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BookId");
 
                     b.HasIndex("UserId");
 
@@ -611,9 +616,17 @@ namespace LibraryServer.Migrations
 
             modelBuilder.Entity("LibraryServer.Model.Test", b =>
                 {
+                    b.HasOne("LibraryServer.Model.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("LibraryServer.Model.User", null)
                         .WithMany("Tests")
                         .HasForeignKey("UserId");
+
+                    b.Navigation("Book");
                 });
 
             modelBuilder.Entity("LibraryServer.Model.UserBook", b =>

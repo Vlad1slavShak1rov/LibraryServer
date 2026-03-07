@@ -42,11 +42,12 @@ namespace LibraryServer.Service
         {
             try
             {
-                var test = await _deepSeekService.GenerateTestAsync(createTest.Topic);
+                var test = await _deepSeekService.GenerateTestAsync(createTest.BookId, createTest.QuestQuantity);
 
                 var entityTest = new Test
                 {
                     Subject = test.Subject,
+                    BookId = test.BookId,
                 };
 
                 await _context.Tests.AddAsync(entityTest);
