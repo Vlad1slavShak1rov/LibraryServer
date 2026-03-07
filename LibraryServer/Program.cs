@@ -12,7 +12,10 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+    options.JsonSerializerOptions.ReferenceHandler =
+    System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+);
 
 builder.Services.AddDbContext<LibraryContext>(option =>
     option.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));

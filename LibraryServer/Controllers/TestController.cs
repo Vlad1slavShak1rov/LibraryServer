@@ -21,7 +21,7 @@ namespace LibraryServer.Controllers
             return Ok(await _testService.GetAll(sortedBy, userId));
         }
 
-        [Authorize(Roles = "Librian, Teacher, Student")]
+        [Authorize(Roles = "Librarian, Teacher, Student")]
         [HttpPost("create")]
         public async Task<IActionResult> CreateTest([FromBody]CreateTestDTO createTest)
         {
@@ -36,7 +36,7 @@ namespace LibraryServer.Controllers
             }
         }
 
-        [Authorize(Roles = "Librian, Teacher, Student")]
+        [Authorize(Roles = "Librarian, Teacher, Student")]
         [HttpGet("get-test")]
         public async Task<IActionResult> GetTestById(int? testId)
         {
@@ -51,7 +51,7 @@ namespace LibraryServer.Controllers
             }
         }
 
-        [Authorize(Roles = "Librian, Teacher, Student")]
+        [Authorize(Roles = "Librarian, Teacher, Student")]
         [HttpPost("send-test")]
         public async Task<IActionResult> CheckResult(SolvedTestDto solvedTest)
         {
