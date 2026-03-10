@@ -2,6 +2,7 @@
 using LibraryServer.DTO;
 using LibraryServer.Model;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 namespace LibraryServer.Service
 {
@@ -15,6 +16,7 @@ namespace LibraryServer.Service
             _deepSeekService = deepSeekService;
         }
 
+        
         public async Task<List<ResultTest>> GetAll(string? sortedBy = null, int? userId = null)
         {
             var tests = _context.ResultTests.AsQueryable();
@@ -42,12 +44,15 @@ namespace LibraryServer.Service
         {
             try
             {
-                var test = await _deepSeekService.GenerateTestAsync(createTest.BookId, createTest.QuestQuantity);
+                BookService bookService = new(_context, new Tools.CheckBookHelper(_context));
+                var book = await bookService.GetById(createTest.BookId);
+
+                var test = await _deepSeekService.GenerateTestAsync(book.Id, createTest.QuestQuantity, book.Title);
 
                 var entityTest = new Test
                 {
                     Subject = test.Subject,
-                    BookId = test.BookId,
+                    BookId = book.Id,
                 };
 
                 await _context.Tests.AddAsync(entityTest);
@@ -72,7 +77,8 @@ namespace LibraryServer.Service
                     UserId = createTest.UserId,
                     TestId = entityTest.Id,
                     Description = createTest.Description,
-                    CreatedAt = DateTime.Now.Date
+                    CreatedAt = DateTime.Now.Date,
+                    TotalQuest = createTest.QuestQuantity
                 };
 
                 await _context.ResultTests.AddAsync(resultTest);
@@ -90,7 +96,18 @@ namespace LibraryServer.Service
 
             } catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                string message = string.Empty;
+                if (ex.InnerException != null)
+                {
+                    if (ex.InnerException is Microsoft.Data.Sqlite.SqliteException sqlEx)
+                    {
+                        message += $"Error: {ex.Message}\n" +
+                            $"Inner: {ex.InnerException.Message}\n"
+                            + $"SQLite Message: {sqlEx.Message}";
+                    }
+                }
+                throw new Exception(message);
+               
             }
            
         }
@@ -116,7 +133,7 @@ namespace LibraryServer.Service
 
         public async Task<bool> TestVerification(SolvedTestDto? solvedTest)
         {
-            var test = await GetById(solvedTest.UserId);
+            var test = await GetById(solvedTest.TestId);
 
             int correctAnswer = 0;
             int i = 0;
@@ -151,6 +168,7 @@ namespace LibraryServer.Service
 
             testResult.IsSuccess = true;
             testResult.Score = score;
+            testResult.CorrectAnswers = correctAnswer;
 
             await _context.SaveChangesAsync();
             return true;

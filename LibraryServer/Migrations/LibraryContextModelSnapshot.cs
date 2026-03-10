@@ -62,6 +62,9 @@ namespace LibraryServer.Migrations
                     b.Property<int>("AuthorID")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Count")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -259,6 +262,9 @@ namespace LibraryServer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("CorrectAnswers")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
@@ -273,6 +279,9 @@ namespace LibraryServer.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("TestId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TotalQuest")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("UserId")

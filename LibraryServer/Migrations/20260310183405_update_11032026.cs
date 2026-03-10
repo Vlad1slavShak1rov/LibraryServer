@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LibraryServer.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateAt08032026 : Migration
+    public partial class update_11032026 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -57,6 +57,7 @@ namespace LibraryServer.Migrations
                     Description = table.Column<string>(type: "TEXT", nullable: false),
                     InStock = table.Column<bool>(type: "INTEGER", nullable: false),
                     TotalRate = table.Column<float>(type: "REAL", nullable: false),
+                    Count = table.Column<int>(type: "INTEGER", nullable: false),
                     ImagePath = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -355,6 +356,8 @@ namespace LibraryServer.Migrations
                     Description = table.Column<string>(type: "TEXT", nullable: false),
                     Score = table.Column<int>(type: "INTEGER", nullable: true),
                     IsSuccess = table.Column<bool>(type: "INTEGER", nullable: false),
+                    TotalQuest = table.Column<int>(type: "INTEGER", nullable: false),
+                    CorrectAnswers = table.Column<int>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>

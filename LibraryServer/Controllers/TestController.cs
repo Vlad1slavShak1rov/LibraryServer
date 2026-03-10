@@ -16,6 +16,8 @@ namespace LibraryServer.Controllers
             _testService = testService;
         }
 
+        [Authorize(Roles = "Librarian, Teacher, Student")]
+        [HttpGet]
         public async Task<IActionResult> GetAll(string? sortedBy = null, int? userId = null)
         {
             return Ok(await _testService.GetAll(sortedBy, userId));

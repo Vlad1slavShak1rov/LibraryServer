@@ -11,13 +11,11 @@ namespace LibraryServer.Service
         private readonly HttpClient _httpClient;
         private readonly string _apiKey;
         private const string OpenRouterApiUrl = "https://openrouter.ai/api/v1/chat/completions";
-        private readonly LibraryContext _context;
         public OpenRouteService(IConfiguration configuration)
         {
             _apiKey = configuration["OpenRouteApi"];
 
             _httpClient = new HttpClient();
-            _context = new LibraryContext();
 
             if (!string.IsNullOrEmpty(_apiKey))
             {
@@ -28,12 +26,12 @@ namespace LibraryServer.Service
             _httpClient.DefaultRequestHeaders.Add("X-Title", "School Test Generator");
         }
 
-        public async Task<Test> GenerateTestAsync(int bookId, int questQuantity)
+        public async Task<Test> GenerateTestAsync(int bookId, int questQuantity, string bookTitle)
         {
             try
             {
-                BookService bookService = new(_context, new Tools.CheckBookHelper(_context));
-                var book = await bookService.GetById(bookId);
+                if (questQuantity <= 0) throw new Exception($"{nameof(questQuantity)} can not be equal zero!");
+                if (questQuantity > 10) throw new Exception($"AI limitation\nThere should be no more than 10 questions");
                 var requestBody = new
                 {
                     model = "openrouter/free",
@@ -78,11 +76,11 @@ namespace LibraryServer.Service
                         new
                         {
                             role = "user",
-                            content = $"Создай тест по теме: {book.Title} для 5 класса"
+                            content = $"Создай тест по теме: {bookTitle} для 5 класса"
                         }
                     },
                     temperature = 0.3,
-                    max_tokens = 2000
+                    max_tokens = 8000
                 };
 
 
@@ -118,7 +116,7 @@ namespace LibraryServer.Service
                     PropertyNameCaseInsensitive = true
                 });
 
-                return test ?? new Test { Subject = book.Title, Questions = new List<QuestionTest>() };
+                return test ?? new Test { Subject = bookTitle, Questions = new List<QuestionTest>() };
             }
             catch (Exception)
             {

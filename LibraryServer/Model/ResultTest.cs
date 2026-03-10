@@ -10,6 +10,8 @@ namespace LibraryServer.Model
         public string Description { get; set; }
         public int? Score { get; set; }
         public bool IsSuccess { get; set; } = false;
+        public int TotalQuest { get; set; }
+        public int CorrectAnswers { get; set; } = 0;
         public DateTime CreatedAt { get; set; }
 
         [ForeignKey("UserId")]

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryServer.Migrations
 {
     [DbContext(typeof(LibraryContext))]
-    [Migration("20260307193119_UpdateAt08032026")]
-    partial class UpdateAt08032026
+    [Migration("20260310183405_update_11032026")]
+    partial class update_11032026
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -63,6 +63,9 @@ namespace LibraryServer.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("AuthorID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Count")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Description")
@@ -262,6 +265,9 @@ namespace LibraryServer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("CorrectAnswers")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
@@ -276,6 +282,9 @@ namespace LibraryServer.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("TestId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TotalQuest")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("UserId")
