@@ -1,5 +1,6 @@
 ﻿using LibraryServer.DbContext;
 using LibraryServer.DTO;
+using LibraryServer.DTO.Tests;
 using LibraryServer.Model;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
@@ -16,162 +17,212 @@ namespace LibraryServer.Service
             _deepSeekService = deepSeekService;
         }
 
-        
-        public async Task<List<ResultTest>> GetAll(string? sortedBy = null, int? userId = null)
+        public async Task<List<TestShortDTO>> GetAllTests(int userId)
         {
-            var tests = _context.ResultTests.AsQueryable();
-
-            if(userId is not null)
-            {
-                tests = tests.Where(t=>t.UserId == userId);
-            }
-
-            if (!string.IsNullOrEmpty(sortedBy))
-            {
-                tests = sortedBy.ToLower() switch
+            return await _context.Tests
+                .Select(t => new TestShortDTO
                 {
-                    "toSuccess" => tests.OrderBy(t => t.IsSuccess),
-                    "toDateUp" => tests.OrderBy(t=>t.CreatedAt),
-                    "toDateDown" => tests.OrderByDescending(t=>t.CreatedAt),
-                    _ => tests.OrderBy(t=>t.Id)
-                };
-            }
+                    Id = t.Id,
+                    TestName = t.TestName,
+                    TestDescription = t.TestDescription,
 
-            return await tests.ToListAsync();
+                    QuestionCount = t.Questions.Count,
+
+                    UserPercent = _context.Results
+                        .Where(r => r.TestId == t.Id && r.UserId == userId)
+                        .OrderByDescending(r => r.CreatedAt)
+                        .Select(r => (double?)r.PercentSuccess)
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
         }
 
-        public async Task<ResultTestDTO> CreateTest(CreateTestDTO createTest)
+        public async Task<TestPassDTO> GetTestById(int testId)
         {
-            try
-            {
-                BookService bookService = new(_context, new Tools.CheckBookHelper(_context));
-                var book = await bookService.GetById(createTest.BookId);
-
-                var test = await _deepSeekService.GenerateTestAsync(book.Id, createTest.QuestQuantity, book.Title);
-
-                var entityTest = new Test
-                {
-                    Subject = test.Subject,
-                    BookId = book.Id,
-                };
-
-                await _context.Tests.AddAsync(entityTest);
-                await _context.SaveChangesAsync();
-
-                var questions = test.Questions
-                    .Select(q => new QuestionTest
-                    {
-                        TestId = entityTest.Id,
-                        Number = q.Number,
-                        Text = q.Text,
-                        Options = q.Options,
-                        CorrectAnswer = q.CorrectAnswer,
-                        Explanation = q.Explanation,
-                    });
-
-                await _context.AddRangeAsync(questions);
-                await _context.SaveChangesAsync();
-
-                var resultTest = new ResultTest()
-                {
-                    UserId = createTest.UserId,
-                    TestId = entityTest.Id,
-                    Description = createTest.Description,
-                    CreatedAt = DateTime.Now.Date,
-                    TotalQuest = createTest.QuestQuantity
-                };
-
-                await _context.ResultTests.AddAsync(resultTest);
-                await _context.SaveChangesAsync();
-
-                var resultTestDto = new ResultTestDTO
-                {
-                    UserId = createTest.UserId,
-                    TestId = entityTest.Id,
-                    Description = createTest.Description,
-                    Score = null
-                };
-
-                return resultTestDto;
-
-            } catch (Exception ex)
-            {
-                string message = string.Empty;
-                if (ex.InnerException != null)
-                {
-                    if (ex.InnerException is Microsoft.Data.Sqlite.SqliteException sqlEx)
-                    {
-                        message += $"Error: {ex.Message}\n" +
-                            $"Inner: {ex.InnerException.Message}\n"
-                            + $"SQLite Message: {sqlEx.Message}";
-                    }
-                }
-                throw new Exception(message);
-               
-            }
-           
-        }
-
-        public async Task<TestDto> GetById(int? testId)
-        {
-            if(testId == null) throw new ArgumentNullException(nameof(testId));
-
             var test = await _context.Tests
-                .Include(t=>t.Questions)
-                .FirstOrDefaultAsync(t=>t.Id == testId);
+                .Where(t => t.Id == testId)
+                .Select(t => new TestPassDTO
+                {
+                    Id = t.Id,
+                    TestName = t.TestName,
+                    TestDescription = t.TestDescription,
 
-            if (test == null) throw new Exception("Test not found!");
+                    Questions = t.Questions
+                        .OrderBy(q => q.Number)
+                        .Select(q => new QuestionPassDTO
+                        {
+                            Id = q.Id,
+                            Number = q.Number,
+                            Text = q.Text,
 
-            var testDto = new TestDto 
-            {
-                Subject = test.Subject,
-                Questions = test.Questions,
-            };
+                            Options = q.Options
+                                .OrderBy(o => o.Order)
+                                .Select(o => new OptionDTO
+                                {
+                                    Id = o.Id,
+                                    Text = o.Text,
+                                    Order = o.Order
+                                })
+                                .ToList()
+                        })
+                        .ToList()
+                })
+                .FirstOrDefaultAsync();
 
-            return testDto;
+            if (test == null)
+                throw new Exception("Test not found");
+
+            return test;
         }
 
-        public async Task<bool> TestVerification(SolvedTestDto? solvedTest)
+        public async Task<TestResultDTO> SubmitTest(SubmitTestDTO submitTest)
         {
-            var test = await GetById(solvedTest.TestId);
+            var questions = await _context.QuestionTests
+                .Where(q => q.TestId == submitTest.TestId)
+                .ToListAsync();
 
-            int correctAnswer = 0;
-            int i = 0;
-            foreach(var t in test.Questions)
+            if (!questions.Any())
+                throw new Exception("Test not found");
+
+            int correct = 0;
+
+            foreach (var answer in submitTest.Answers)
             {
-                if(t.CorrectAnswer == solvedTest.Answers[i])
-                {
-                    correctAnswer ++;
-                }
+                var question = questions.FirstOrDefault(q => q.Id == answer.QuestionId);
 
-                i++;
+                if (question == null)
+                    continue;
+
+                if (question.CorrectAnswer == answer.SelectedOption)
+                    correct++;
             }
 
-            int quantityQuestion = test.Questions.Count;
-            double percent = correctAnswer / quantityQuestion * 100;
+            int total = questions.Count;
 
-            int score = (percent) switch
+            double percent = Math.Round((double)correct / total * 100, 2);
+
+            var result = new TestResult
             {
-                >= 90 => 5,
-                >= 75 => 4,
-                >= 60 => 3,
-                >= 0 => 2,
-                _ => -1,
+                TestId = submitTest.TestId,
+                UserId = submitTest.UserId,
+                PercentSuccess = percent,
+                CreatedAt = DateTime.UtcNow
             };
 
-            if (score == -1) throw new Exception("There was an error checking your score");
-
-            var testResult = await _context.ResultTests
-                .FirstOrDefaultAsync(t=>t.UserId == solvedTest.UserId && t.TestId == solvedTest.TestId);
-
-            if (testResult == null) throw new Exception("The test is not found!");
-
-            testResult.IsSuccess = true;
-            testResult.Score = score;
-            testResult.CorrectAnswers = correctAnswer;
-
+            await _context.Results.AddAsync(result);
             await _context.SaveChangesAsync();
-            return true;
+
+            return new TestResultDTO
+            {
+                TestId = submitTest.TestId,
+                UserId = submitTest.UserId,
+                PercentSuccess = percent,
+                CorrectAnswers = correct,
+                TotalQuestions = total
+            };
+        }
+
+        public async Task<List<TestResultShortDTO>> GetAllResults()
+        {
+            return await _context.Results
+                .Select(r => new TestResultShortDTO
+                {
+                    Id = r.Id,
+                    TestId = r.TestId,
+                    TestName = r.Test.TestName,
+                    UserId = r.UserId,
+                    UserName = r.User.Login,
+                    PercentSuccess = r.PercentSuccess,
+                    CreatedAt = r.CreatedAt
+                })
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<UserTestResultDTO> GetResultById(int resultId)
+        {
+            var result = await _context.Results
+                .Where(r => r.Id == resultId)
+                .Select(r => new UserTestResultDTO
+                {
+                    Id = r.Id,
+                    TestId = r.TestId,
+                    TestName = r.Test.TestName,
+                    UserId = r.UserId,
+                    UserName = r.User.Login,
+                    PercentSuccess = r.PercentSuccess,
+                    CreatedAt = r.CreatedAt
+                })
+                .FirstOrDefaultAsync();
+
+            if (result == null)
+                throw new Exception("Result not found");
+
+            return result;
+        }
+
+        public async Task<Test> CreateTest(CreateTestDTO createTest)
+        {
+            var book = await _context.Books.FindAsync(createTest.BookId);
+
+            if (book == null)
+                throw new Exception("Book not found");
+
+            var generatedTest = await _deepSeekService.GenerateTestAsync(
+                book.Id,
+                createTest.QuestionQuantity,
+                book.Title
+            );
+
+            var test = new Test
+            {
+                BookId = book.Id,
+                TestName = $"Тест по произведению {book.Title}",
+                TestDescription = createTest.Description
+            };
+
+            await _context.Tests.AddAsync(test);
+            await _context.SaveChangesAsync();
+
+            var questions = new List<QuestionTest>();
+            var options = new List<QuestionOption>();
+
+            foreach (var q in generatedTest.Questions)
+            {
+                var question = new QuestionTest
+                {
+                    TestId = test.Id,
+                    Number = q.Number,
+                    Text = q.Text,
+                    CorrectAnswer = q.CorrectAnswer,
+                    Explanation = q.Explanation
+                };
+
+                questions.Add(question);
+            }
+
+            await _context.QuestionTests.AddRangeAsync(questions);
+            await _context.SaveChangesAsync();
+
+            foreach (var q in generatedTest.Questions)
+            {
+                var questionEntity = questions.First(x => x.Number == q.Number);
+
+                for (int i = 0; i < q.Options.Count; i++)
+                {
+                    options.Add(new QuestionOption
+                    {
+                        QuestionTestId = questionEntity.Id,
+                        Text = q.Options[i],
+                        Order = i
+                    });
+                }
+            }
+
+            await _context.QuestionOptions.AddRangeAsync(options);
+            await _context.SaveChangesAsync();
+
+            return test;
         }
     }
 }

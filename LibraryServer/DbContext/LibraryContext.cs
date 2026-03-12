@@ -19,10 +19,12 @@ namespace LibraryServer.DbContext
         public virtual DbSet<ReviewBook> ReviewBooks { get; set; }
         public virtual DbSet<Test> Tests { get; set; }
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<QuestionTest> QuestionTests { get; set; }
+        public virtual DbSet<TestResult> Results { get; set; }
+        public virtual DbSet<QuestionOption> QuestionOptions { get; set; }
         public virtual DbSet<UserBook> UserBooks { get; set; }
         public virtual DbSet<Teacher> Teachers { get; set; }
         public virtual DbSet<Student> Students { get; set; }
         public virtual DbSet<ResultTest> ResultTests { get; set; }
-        public virtual DbSet<QuestionTest> QuestionTests { get; set; }
     }
 }

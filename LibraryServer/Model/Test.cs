@@ -10,7 +10,8 @@ namespace LibraryServer.Model
         public int Id { get; set; }
         
         public int BookId { get; set;  }
-        public string Subject { get; set; }
+        public string TestName { get; set; }
+        public string TestDescription { get; set; }
         
         public virtual List<QuestionTest> Questions { get; set; }
         public virtual List<ResultTest> ResultTests { get; set; }

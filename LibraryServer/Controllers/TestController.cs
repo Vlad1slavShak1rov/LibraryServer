@@ -1,4 +1,5 @@
 ﻿using LibraryServer.DTO;
+using LibraryServer.DTO.Tests;
 using LibraryServer.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,19 +18,20 @@ namespace LibraryServer.Controllers
         }
 
         [Authorize(Roles = "Librarian, Teacher, Student")]
-        [HttpGet]
-        public async Task<IActionResult> GetAll(string? sortedBy = null, int? userId = null)
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllTests(int userId)
         {
-            return Ok(await _testService.GetAll(sortedBy, userId));
+            var tests = await _testService.GetAllTests(userId);
+            return Ok(tests);
         }
 
-        [Authorize(Roles = "Librarian, Teacher, Student")]
-        [HttpPost("create")]
-        public async Task<IActionResult> CreateTest([FromBody]CreateTestDTO createTest)
+        [Authorize]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetTest(int id)
         {
             try
             {
-                var test = await _testService.CreateTest(createTest);
+                var test = await _testService.GetTestById(id);
                 return Ok(test);
             }
             catch (Exception ex)
@@ -39,31 +41,63 @@ namespace LibraryServer.Controllers
         }
 
         [Authorize(Roles = "Librarian, Teacher, Student")]
-        [HttpGet("get-test")]
-        public async Task<IActionResult> GetTestById(int? testId)
+        [HttpPost("submit")]
+        public async Task<IActionResult> SubmitTest([FromBody] SubmitTestDTO submitTest)
         {
             try
             {
-                var test = await _testService.GetById(testId);
-                return Ok(test);
+                var result = await _testService.SubmitTest(submitTest);
 
-            } catch (Exception ex)
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize(Roles = "Teacher,Librarian")]
+        [HttpGet("results")]
+        public async Task<IActionResult> GetAllResults()
+        {
+            try
+            {
+                var results = await _testService.GetAllResults();
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("results/{id}")]
+        public async Task<IActionResult> GetResultById(int id)
+        {
+            try
+            {
+                var result = await _testService.GetResultById(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
 
         [Authorize(Roles = "Librarian, Teacher, Student")]
-        [HttpPost("send-test")]
-        public async Task<IActionResult> CheckResult(SolvedTestDto solvedTest)
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateTest([FromBody] CreateTestDTO createTest)
         {
             try
             {
-                var result = await _testService.TestVerification(solvedTest);
-                return Ok(result);
-            } catch (Exception ex)
+                var test = await _testService.CreateTest(createTest);
+                return Ok(test);
+            }
+            catch (Exception ex)
             {
-                return BadRequest($"{ex.Message}");
+                return BadRequest(ex.Message);
             }
         }
     }

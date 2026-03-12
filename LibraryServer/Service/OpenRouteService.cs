@@ -1,5 +1,6 @@
 ﻿using LibraryServer.DbContext;
 using LibraryServer.DTO;
+using LibraryServer.DTO.Tests;
 using LibraryServer.Model;
 using System.Text;
 using System.Text.Json;
@@ -26,7 +27,7 @@ namespace LibraryServer.Service
             _httpClient.DefaultRequestHeaders.Add("X-Title", "School Test Generator");
         }
 
-        public async Task<Test> GenerateTestAsync(int bookId, int questQuantity, string bookTitle)
+        public async Task<GeneratedTestDTO> GenerateTestAsync(int bookId, int questQuantity, string bookTitle)
         {
             try
             {
@@ -111,12 +112,17 @@ namespace LibraryServer.Service
                 var cleanedContent = CleanJsonResponse(content);
 
 
-                var test = JsonSerializer.Deserialize<Test>(cleanedContent, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                var test = JsonSerializer.Deserialize<GeneratedTestDTO>(cleanedContent,
+                    new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
 
-                return test ?? new Test { Subject = bookTitle, Questions = new List<QuestionTest>() };
+                return test ?? new GeneratedTestDTO
+                {
+                    Subject = bookTitle,
+                    Questions = new List<GeneratedQuestionDTO>()
+                };
             }
             catch (Exception)
             {

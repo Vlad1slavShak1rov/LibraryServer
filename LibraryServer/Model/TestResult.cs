@@ -3,18 +3,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LibraryServer.Model
 {
-    public class QuestionTest
+    public class TestResult
     {
         [Key]
         public int Id { get; set; }
-        [Required]
+        public int UserId { get; set; }
         public int TestId { get; set; }
-        public int Number { get; set; }
-        [Required]
-        public string Text { get; set; }
-        public int CorrectAnswer { get; set; }
-        public string? Explanation { get; set; }
-        public virtual List<QuestionOption> Options { get; set; } = new();
+        public double PercentSuccess { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [ForeignKey(nameof(UserId))]
+        public virtual User User { get; set; }
 
         [ForeignKey(nameof(TestId))]
         public virtual Test Test { get; set; }
