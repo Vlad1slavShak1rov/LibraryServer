@@ -28,6 +28,8 @@ builder.Services.AddScoped<AuthorService>();
 builder.Services.AddScoped<TeacherService>();
 builder.Services.AddScoped<TestService>();
 builder.Services.AddScoped<OpenRouteService>();
+builder.Services.AddScoped<BookigBookService>();
+
 
 builder.Services.AddEndpointsApiExplorer();
 

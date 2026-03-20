@@ -43,12 +43,12 @@ namespace LibraryServer.Controllers
         }
 
         [Authorize(Roles = "Librarian, Teacher, Student")]
-        [HttpGet("myActive")]
-        public async Task<IActionResult> GetActive([FromRoute] int id)
+        [HttpGet("myActive/{userId}")]
+        public async Task<IActionResult> GetActive([FromRoute] int userId)
         {
             try
             {
-                var list = await _bookingBookService.GetMyActive(id);
+                var list = await _bookingBookService.GetMyActive(userId);
                 return Ok(list);
             }
             catch (Exception ex)

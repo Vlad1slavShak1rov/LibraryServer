@@ -41,6 +41,7 @@ namespace LibraryServer.Service
             var bookinDto = booking
                 .Select(b => new BookReservationGetAll
                 {
+                    RentId = b.Id,
                     UserName = b.User.Login,
                     BookTitle = b.Book.Title,
                     StartReservation = b.StartReservation, EndReservation = b.EndReservation,
@@ -106,14 +107,15 @@ namespace LibraryServer.Service
             return true;
         }
 
-        public async Task<List<BookReservationGetAll>> GetMyActive(int? id)
+        public async Task<List<BookReservationGetAll>> GetMyActive(int? userId)
         {
-            if (id is null) throw new ArgumentNullException(nameof(id));
+            if (userId is null) throw new ArgumentNullException(nameof(userId));
 
-            var myActiveRent = _context.BookReservations
+            var myActiveRent = await _context.BookReservations
                 .Include(b=>b.User)
                 .Include(b=>b.Book)
-                .Where(b => b.UserId == id);
+                .Where(b => b.UserId == userId)
+                .ToListAsync();
 
             var myActiveRentDto = myActiveRent.Select(b => new BookReservationGetAll
             {
@@ -123,7 +125,7 @@ namespace LibraryServer.Service
                 EndReservation = b.EndReservation,
             });
 
-            return await myActiveRentDto.ToListAsync();
+            return myActiveRentDto.ToList();
         }
 
         public async Task<bool> ReturnBook(ReturnBookDto returnBookDto)
@@ -148,6 +150,8 @@ namespace LibraryServer.Service
 
             if (book.InStock == false && book.Count > 0) book.InStock = true;
 
+
+            _context.BookReservations.Remove(rentalBook);
             await _context.SaveChangesAsync();
 
             return true;
