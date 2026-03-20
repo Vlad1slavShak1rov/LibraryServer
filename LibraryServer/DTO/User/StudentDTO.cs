@@ -1,7 +1,6 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace LibraryServer.DTO
+namespace LibraryServer.DTO.User
 {
     public class StudentDTO
     {

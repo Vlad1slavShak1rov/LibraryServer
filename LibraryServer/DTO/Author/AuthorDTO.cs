@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace LibraryServer.DTO
+namespace LibraryServer.DTO.Author
 {
     public class AuthorDTO
     {

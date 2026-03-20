@@ -1,5 +1,6 @@
 ﻿using LibraryServer.DbContext;
-using LibraryServer.DTO;
+using LibraryServer.DTO.Book;
+using LibraryServer.DTO.FavouriteBook;
 using LibraryServer.Model;
 using LibraryServer.Service;
 using Microsoft.AspNetCore.Authorization;

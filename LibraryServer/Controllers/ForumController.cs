@@ -1,5 +1,5 @@
 ﻿using LibraryServer.DbContext;
-using LibraryServer.DTO;
+using LibraryServer.DTO.Forum;
 using LibraryServer.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

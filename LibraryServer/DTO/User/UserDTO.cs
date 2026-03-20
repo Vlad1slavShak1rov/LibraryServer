@@ -1,7 +1,7 @@
 ﻿using LibraryServer.Model;
 using System.ComponentModel.DataAnnotations;
 
-namespace LibraryServer.DTO
+namespace LibraryServer.DTO.User
 {
     public class UserDTO
     {

@@ -1,5 +1,5 @@
 ﻿using LibraryServer.DbContext;
-using LibraryServer.DTO;
+using LibraryServer.DTO.User;
 using LibraryServer.Model;
 using Microsoft.EntityFrameworkCore;
 

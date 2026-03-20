@@ -1,5 +1,5 @@
 ﻿using LibraryServer.DbContext;
-using LibraryServer.DTO;
+using LibraryServer.DTO.Book;
 using LibraryServer.Model;
 using LibraryServer.Tools;
 using Microsoft.EntityFrameworkCore;

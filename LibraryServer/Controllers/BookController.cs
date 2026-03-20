@@ -1,4 +1,4 @@
-﻿using LibraryServer.DTO;
+﻿using LibraryServer.DTO.Book;
 using LibraryServer.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

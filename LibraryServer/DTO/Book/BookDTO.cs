@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace LibraryServer.DTO
+namespace LibraryServer.DTO.Book
 {
     public class BookDTO
     {

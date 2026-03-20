@@ -1,5 +1,6 @@
 ﻿using LibraryServer.DbContext;
-using LibraryServer.DTO;
+using LibraryServer.DTO.Book;
+using LibraryServer.DTO.FavouriteBook;
 using LibraryServer.Model;
 using Microsoft.EntityFrameworkCore;
 
