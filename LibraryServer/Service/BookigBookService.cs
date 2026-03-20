@@ -15,27 +15,28 @@ namespace LibraryServer.Service
 
         public async Task<List<BookReservationGetAll>> GetAll(string? searchText = null, string? sortedBy = null)
         {
-
             var booking = _context.BookReservations
                 .Include(r => r.Book)
-                .Include(u=>u.User)
+                .Include(u => u.User)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(searchText))
             {
+                var searchPattern = $"%{searchText}%";
+
                 booking = booking
-                    .Where(b=>b.Book.Title.StartsWith(searchText) || b.User.Login.StartsWith(searchText));
+                    .Where(b => EF.Functions.Like(b.Book.Title, searchPattern)
+                        || EF.Functions.Like(b.User.Login, searchPattern));
             }
 
             if (!string.IsNullOrEmpty(sortedBy))
             {
                 booking = sortedBy.ToLower() switch
                 {
-                    "byActive" => booking.OrderBy(b=>b.Book.InStock),
-                    "byUser" => booking.OrderBy(b=>b.User.Login),
-                    _ => booking.OrderBy(b=>b.Id)
+                    "byactive" => booking.OrderBy(b => b.Book.InStock),
+                    "byuser" => booking.OrderBy(b => b.User.Login),
+                    _ => booking.OrderBy(b => b.Id)
                 };
-
             }
 
             var bookinDto = booking
@@ -44,7 +45,8 @@ namespace LibraryServer.Service
                     RentId = b.Id,
                     UserName = b.User.Login,
                     BookTitle = b.Book.Title,
-                    StartReservation = b.StartReservation, EndReservation = b.EndReservation,
+                    StartReservation = b.StartReservation,
+                    EndReservation = b.EndReservation,
                 });
 
             return await bookinDto.ToListAsync();
