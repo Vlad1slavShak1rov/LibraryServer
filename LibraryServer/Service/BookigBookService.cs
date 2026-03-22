@@ -33,8 +33,9 @@ namespace LibraryServer.Service
             {
                 booking = sortedBy.ToLower() switch
                 {
-                    "byactive" => booking.OrderBy(b => b.Book.InStock),
                     "byuser" => booking.OrderBy(b => b.User.Login),
+                    "byexpired" => booking.OrderByDescending(b=>b.RentStatus == Enums.RentStatus.Expired),
+                    "byactive" => booking.OrderByDescending(b=>b.RentStatus == Enums.RentStatus.Active),
                     _ => booking.OrderBy(b => b.Id)
                 };
             }
