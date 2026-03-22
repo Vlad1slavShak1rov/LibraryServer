@@ -98,6 +98,7 @@ namespace LibraryServer.Service
                 UserId = createBookingDto.UserId.Value,
                 StartReservation = createBookingDto.DateStart.Value.Date,
                 EndReservation = createBookingDto.DateEnd.Value.Date,
+                RentStatus = Enums.RentStatus.Active,
             };
 
             book.Count -= 1;
@@ -130,7 +131,7 @@ namespace LibraryServer.Service
             return myActiveRentDto.ToList();
         }
 
-        public async Task<bool> ReturnBook(ReturnBookDto returnBookDto)
+        public async Task<Enums.RentStatus> ReturnBook(ReturnBookDto returnBookDto)
         {
             if(returnBookDto.RentalId is null)
             {
@@ -152,11 +153,11 @@ namespace LibraryServer.Service
 
             if (book.InStock == false && book.Count > 0) book.InStock = true;
 
+            rentalBook.RentStatus = rentalBook.EndReservation < DateTime.Now.Date ? 
+                Enums.RentStatus.Expired : Enums.RentStatus.Pass;
 
-            _context.BookReservations.Remove(rentalBook);
             await _context.SaveChangesAsync();
-
-            return true;
+            return rentalBook.RentStatus;
         }
     }
 }

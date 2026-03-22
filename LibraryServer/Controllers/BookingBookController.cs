@@ -63,8 +63,12 @@ namespace LibraryServer.Controllers
         {
             try
             {
-                bool res = await _bookingBookService.ReturnBook(returnBookDto);
-                return Ok(res);
+                var res = await _bookingBookService.ReturnBook(returnBookDto);
+                return Ok(new 
+                {
+                    Status = true, 
+                    RentInformation = res
+                });
             } 
             catch (Exception ex)
             {
