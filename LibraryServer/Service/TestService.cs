@@ -186,66 +186,74 @@ namespace LibraryServer.Service
 
         public async Task<Test> CreateTest(CreateTestDTO createTest)
         {
-            var book = await _context.Books.FindAsync(createTest.BookId);
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            if (book == null)
-                throw new Exception("Book not found");
-
-            var generatedTest = await _deepSeekService.GenerateTestAsync(
-                book.Id,
-                createTest.QuestionQuantity,
-                book.Title
-            );
-
-            var test = new Test
+            try
             {
-                BookId = book.Id,
-                TestName = $"Тест по произведению {book.Title}",
-                TestDescription = createTest.Description
-            };
+                var book = await _context.Books.FindAsync(createTest.BookId);
+                if (book == null)
+                    throw new Exception("Book not found");
 
-            await _context.Tests.AddAsync(test);
-            await _context.SaveChangesAsync();
+                var generatedTest = await _deepSeekService.GenerateTestAsync(
+                    book.Id,
+                    createTest.QuestionQuantity,
+                    book.Title
+                );
 
-            var questions = new List<QuestionTest>();
-            var options = new List<QuestionOption>();
-
-            foreach (var q in generatedTest.Questions)
-            {
-                var question = new QuestionTest
+                var test = new Test
                 {
-                    TestId = test.Id,
-                    Number = q.Number,
-                    Text = q.Text,
-                    CorrectAnswer = q.CorrectAnswer,
-                    Explanation = q.Explanation
+                    BookId = book.Id,
+                    TestName = $"Тест по произведению {book.Title}",
+                    TestDescription = createTest.Description
                 };
 
-                questions.Add(question);
-            }
+                await _context.Tests.AddAsync(test);
+                await _context.SaveChangesAsync();  
 
-            await _context.QuestionTests.AddRangeAsync(questions);
-            await _context.SaveChangesAsync();
-
-            foreach (var q in generatedTest.Questions)
-            {
-                var questionEntity = questions.First(x => x.Number == q.Number);
-
-                for (int i = 0; i < q.Options.Count; i++)
+                var questions = new List<QuestionTest>();
+                foreach (var q in generatedTest.Questions)
                 {
-                    options.Add(new QuestionOption
+                    questions.Add(new QuestionTest
                     {
-                        QuestionTestId = questionEntity.Id,
-                        Text = q.Options[i],
-                        Order = i
+                        TestId = test.Id,
+                        Number = q.Number,
+                        Text = q.Text,
+                        CorrectAnswer = q.CorrectAnswer,
+                        Explanation = q.Explanation
                     });
                 }
+
+                await _context.QuestionTests.AddRangeAsync(questions);
+                await _context.SaveChangesAsync();
+
+                var options = new List<QuestionOption>();
+                foreach (var q in generatedTest.Questions)
+                {
+                    var questionEntity = questions.First(x => x.Number == q.Number);
+
+                    for (int i = 0; i < q.Options.Count; i++)
+                    {
+                        options.Add(new QuestionOption
+                        {
+                            QuestionTestId = questionEntity.Id,
+                            Text = q.Options[i],
+                            Order = i
+                        });
+                    }
+                }
+
+                await _context.QuestionOptions.AddRangeAsync(options);
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                return test;
             }
-
-            await _context.QuestionOptions.AddRangeAsync(options);
-            await _context.SaveChangesAsync();
-
-            return test;
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task<AssignedTest> AssignTest(AssignTestDTO dto)

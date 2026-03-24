@@ -33,7 +33,7 @@ namespace LibraryServer.Controllers
             try
             {
                 await _bookingBookService.CreateReservation(createBookingDto);
-                return Ok(true);
+                return Ok(new { msg = "Бронирование успешно создано", access = false });
             } 
             catch (Exception ex)
             {
