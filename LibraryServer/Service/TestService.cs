@@ -81,6 +81,11 @@ namespace LibraryServer.Service
                 .Where(q => q.TestId == submitTest.TestId)
                 .ToListAsync();
 
+            var assigned = await _context.AssignedTest
+                .FirstOrDefaultAsync(x =>
+                    x.UserId == submitTest.UserId &&
+                    x.TestId == submitTest.TestId);
+
             if (!questions.Any())
                 throw new Exception("Test not found");
 
@@ -110,6 +115,24 @@ namespace LibraryServer.Service
             };
 
             await _context.Results.AddAsync(result);
+
+            if (assigned == null)
+            {
+                assigned = new AssignedTest
+                {
+                    UserId = submitTest.UserId,
+                    TestId = submitTest.TestId,
+                    IsCompleted = true,
+                    AssignedAt = DateTime.UtcNow
+                };
+
+                await _context.AssignedTest.AddAsync(assigned);
+            }
+            else
+            {
+                assigned.IsCompleted = true;
+            }
+
             await _context.SaveChangesAsync();
 
             return new TestResultDTO
@@ -223,6 +246,29 @@ namespace LibraryServer.Service
             await _context.SaveChangesAsync();
 
             return test;
+        }
+
+        public async Task<AssignedTest> AssignTest(AssignTestDTO dto)
+        {
+            var assignedTest = new AssignedTest
+            {
+                UserId = dto.UserId,
+                TestId = dto.TestId,
+                DueDate = dto.DueDate
+            };
+
+            _context.AssignedTest.Add(assignedTest);
+            await _context.SaveChangesAsync();
+
+            return assignedTest;
+        }
+
+        public async Task<List<AssignedTest>> GetUserAssignedTests(int userId)
+        {
+            return await _context.AssignedTest
+                .Where(x => x.UserId == userId)
+                .Include(x => x.Test)
+                .ToListAsync();
         }
     }
 }

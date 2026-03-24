@@ -14,6 +14,7 @@ namespace LibraryServer.DbContext
         public virtual DbSet<BookReservation> BookReservations { get; set; }
         public virtual DbSet<Events> Events { get; set; }
         public virtual DbSet<Forum> Forums { get; set; }
+        public virtual DbSet<AssignedTest> AssignedTest { get; set; }
         public virtual DbSet<ForumMessage> ForumMessages { get; set; }
         public virtual DbSet<QuotesBooks> QuotesBooks{ get; set; }
         public virtual DbSet<ReviewBook> ReviewBooks { get; set; }

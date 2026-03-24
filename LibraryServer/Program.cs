@@ -9,8 +9,13 @@ using System.Reflection;
 using System.Text;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
+using DotNetEnv;
+
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.ReferenceHandler =

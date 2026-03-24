@@ -19,7 +19,7 @@ namespace LibraryServer.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "User, Librarian, Teacher")]
+        [Authorize(Roles = "Student, Librarian, Teacher")]
         public async Task<IActionResult> GetAllUserBook()
         {
             try
@@ -34,7 +34,7 @@ namespace LibraryServer.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "User, Librarian, Teacher")]
+        [Authorize(Roles = "Student, Librarian, Teacher")]
         public async Task<IActionResult> GetAllFavoriteByUser([FromRoute] int id)
         {
             try
@@ -48,7 +48,7 @@ namespace LibraryServer.Controllers
             }
         }
 
-        [Authorize(Roles = "User, Librarian, Teacher")]
+        [Authorize(Roles = "Student, Librarian, Teacher")]
         [HttpPost]
         public async Task<IActionResult> AddFavourite([FromBody] BookUserDTO bookUserDTO)
         {
@@ -63,7 +63,7 @@ namespace LibraryServer.Controllers
             
         }
 
-        [Authorize(Roles = "User, Librarian, Teacher")]
+        [Authorize(Roles = "Student, Librarian, Teacher")]
         [HttpDelete]
         public async Task<IActionResult> RemoveFavourite([FromBody] RemoveFavouriteRequestDTO? removeFavouriteRequestDTO)
         {

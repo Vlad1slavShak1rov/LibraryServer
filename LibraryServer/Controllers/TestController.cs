@@ -100,5 +100,27 @@ namespace LibraryServer.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [Authorize(Roles = "Teacher,Librarian")]
+        [HttpPost("assign")]
+        public async Task<IActionResult> AssignTest([FromBody] AssignTestDTO dto)
+        {
+            try
+            {
+                var result = await _testService.AssignTest(dto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("assigned")]
+        public async Task<IActionResult> GetAssignedTests(int userId)
+        {
+            var tests = await _testService.GetUserAssignedTests(userId);
+            return Ok(tests);
+        }
     }
 }
