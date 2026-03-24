@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace LibraryServer.DTO
+namespace LibraryServer.DTO.FavouriteBook
 {
     public class RemoveFavouriteRequestDTO
     {

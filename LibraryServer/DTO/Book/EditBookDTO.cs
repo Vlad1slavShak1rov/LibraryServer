@@ -1,4 +1,4 @@
-﻿namespace LibraryServer.DTO
+﻿namespace LibraryServer.DTO.Book
 {
     public class EditBookDTO
     {

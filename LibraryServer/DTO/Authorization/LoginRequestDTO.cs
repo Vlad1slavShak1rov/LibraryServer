@@ -1,4 +1,4 @@
-﻿namespace LibraryServer.DTO
+﻿namespace LibraryServer.DTO.Authorization
 {
     public class LoginRequestDTO
     {

@@ -9,6 +9,7 @@ namespace LibraryServer.Model
         public int Id { get; set; }
         public int BookId { get; set; }
         public int UserId { get; set; }
+        public Enums.RentStatus RentStatus { get; set; }
         public DateTime StartReservation { get; set; }
         public DateTime EndReservation { get; set; }
 

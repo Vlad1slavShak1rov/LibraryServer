@@ -1,6 +1,7 @@
 ﻿using BCrypt.Net;
 using LibraryServer.DbContext;
-using LibraryServer.DTO;
+using LibraryServer.DTO.Authorization;
+using LibraryServer.DTO.User;
 using LibraryServer.Model;
 using LibraryServer.Tools;
 using Microsoft.AspNetCore.Authorization;
