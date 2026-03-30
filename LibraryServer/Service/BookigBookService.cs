@@ -45,7 +45,11 @@ namespace LibraryServer.Service
                 {
                     RentId = b.Id,
                     UserName = b.User.Login,
-                    BookTitle = b.Book.Title,
+                    BookId = b.Book.Id,
+                    Genre = b.Book.Genre,
+                    Title = b.Book.Title,
+                    Description = b.Book.Description,
+                    ImagePath = b.Book.ImagePath,
                     StartReservation = b.StartReservation,
                     EndReservation = b.EndReservation,
                 });
@@ -123,8 +127,13 @@ namespace LibraryServer.Service
 
             var myActiveRentDto = myActiveRent.Select(b => new BookReservationGetAll
             {
+                RentId = b.Id,
                 UserName = b.User.Login,
-                BookTitle = b.Book.Title,
+                BookId = b.Book.Id,
+                Genre = b.Book.Genre,
+                Title = b.Book.Title,
+                Description = b.Book.Description,
+                ImagePath = b.Book.ImagePath,
                 StartReservation = b.StartReservation,
                 EndReservation = b.EndReservation,
             });
