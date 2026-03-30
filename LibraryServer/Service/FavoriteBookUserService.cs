@@ -26,7 +26,7 @@ namespace LibraryServer.Service
                 .ToListAsync();
         }
 
-        public async Task<List<Book>> GetBookByUser(int? id)
+        public async Task<List<BookDTO>> GetBookByUser(int? id)
         {
             if(id == null || id == 0)
             {
@@ -35,8 +35,19 @@ namespace LibraryServer.Service
 
             var list = await _libraryContext.UserBooks
                 .Include(b=>b.Book)
+                .ThenInclude(a=>a.Author)
                 .Where(b=>b.UserId == id)
-                .Select(b=>b.Book)
+                .Select(b=>new BookDTO
+                {
+                    Id = b.Book.Id,
+                    Genre = b.Book.Genre,
+                    Title = b.Book.Title,
+                    AuthorName = b.Book.Author.FullName,
+                    Description = b.Book.Description,
+                    InStock = b.Book.InStock,
+                    ImagePath = b.Book.ImagePath,
+                    TotalRate = b.Book.TotalRate,
+                })
                 .ToListAsync();
                 
             return list;
