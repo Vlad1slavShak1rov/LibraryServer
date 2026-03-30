@@ -34,6 +34,11 @@ namespace LibraryServer.Controllers
            
         }
 
+        /// <summary>
+        /// Получение всех книг из "Избраных"
+        /// </summary>
+        /// <param name="id">ID пользователя</param>
+        /// <returns>Список всех избранных</returns>
         [HttpGet("{id}")]
         [Authorize(Roles = "Student, Librarian, Teacher")]
         public async Task<IActionResult> GetAllFavoriteByUser([FromRoute] int id)
