@@ -13,6 +13,7 @@ namespace LibraryServer.DTO.Book
         public string Description { get; set; }
         public bool InStock { get; set; }
         public float TotalRate { get; set; }
+        public int count { get; set; }
         public string? ImagePath { get; set; }
     }
 }

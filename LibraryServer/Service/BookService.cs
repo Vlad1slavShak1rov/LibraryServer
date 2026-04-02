@@ -29,6 +29,7 @@ namespace LibraryServer.Service
                    TotalRate = b.TotalRate,
                    Description = b.Description,
                    Genre = b.Genre,
+                   count = b.Count,
                    ImagePath = b.ImagePath,
                });
 
@@ -63,6 +64,7 @@ namespace LibraryServer.Service
                 Genre = book.Genre,
                 ImagePath = book.ImagePath,
                 AuthorName = book.Author.FullName,
+                count = book.Count,
                 InStock = book.InStock,
             };
 

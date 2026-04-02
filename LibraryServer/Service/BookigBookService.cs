@@ -97,6 +97,18 @@ namespace LibraryServer.Service
                 throw new Exception("The book is out of stock");
             }
 
+            var existingReservation = await _context.BookReservations
+                                            .AnyAsync(b =>
+                                                b.BookId == createBookingDto.BookId &&
+                                                b.UserId == createBookingDto.UserId &&
+                                                b.RentStatus == Enums.RentStatus.Active
+                                            );
+
+            if (existingReservation)
+            {
+                throw new Exception("You already have an active reservation for this book");
+            }
+
             BookReservation bookReservation = new()
             {
                 BookId = createBookingDto.BookId.Value,
@@ -120,9 +132,9 @@ namespace LibraryServer.Service
             if (userId is null) throw new ArgumentNullException(nameof(userId));
 
             var myActiveRent = await _context.BookReservations
-                .Include(b=>b.User)
-                .Include(b=>b.Book)
-                .Where(b => b.UserId == userId)
+                .Include(b => b.User)
+                .Include(b => b.Book)
+                .Where(b => b.UserId == userId && b.RentStatus == Enums.RentStatus.Active)
                 .ToListAsync();
 
             var myActiveRentDto = myActiveRent.Select(b => new BookReservationGetAll
