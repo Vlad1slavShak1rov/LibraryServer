@@ -10,6 +10,7 @@
         public bool InStock { get; set; }
         public float TotalRate { get; set; }
         public int Count { get; set; }
+        public Enums.RentStatus RentStatus { get; set; }
         public string? ImagePath { get; set; }
         public string UserName { get; set; }
         public DateTime StartReservation { get; set; }

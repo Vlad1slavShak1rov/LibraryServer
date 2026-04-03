@@ -52,6 +52,7 @@ namespace LibraryServer.Service
                     ImagePath = b.Book.ImagePath,
                     StartReservation = b.StartReservation,
                     EndReservation = b.EndReservation,
+                    RentStatus = b.RentStatus
                 });
 
             return await bookinDto.ToListAsync();
