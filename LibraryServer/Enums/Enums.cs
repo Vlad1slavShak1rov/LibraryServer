@@ -9,9 +9,17 @@
 
     public enum RentStatus
     {
-        Active = 0,
-        Pass = 1,
-        Expired = 2
+        Active = 0, //Активна
+        Pass = 1, //Сдана
+        Expired = 2 //Просрочена
     }
 
+    public enum BookingStatus
+    {
+        Pending = 0,   // Забронирована, ждет выдачи
+        Issued = 1,    // Выдана
+        Cancelled = 2,  // Отменена
+        Returned = 3,  // Возвращена
+
+    }
 }

@@ -74,7 +74,22 @@ namespace LibraryServer.Controllers
             {
                 return BadRequest(new { msg = ex.Message });
             }
-            
+        }
+
+        [Authorize(Roles = "Librarian")]
+        [HttpPut("librian/issue")]
+        public async Task<IActionResult> BookIssuance([FromBody] IssueBookDTO issueBook)
+        {
+            try
+            {
+                var result = await _bookingBookService.IssueBook(issueBook);
+                return Ok(new { msg = "Книга выдана", access = result});
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { msg = ex.Message, access = false });
+            }
         }
     }
 }
+

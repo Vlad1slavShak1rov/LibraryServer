@@ -52,7 +52,7 @@ namespace LibraryServer.Service
                     ImagePath = b.Book.ImagePath,
                     StartReservation = b.StartReservation,
                     EndReservation = b.EndReservation,
-                    RentStatus = b.RentStatus
+                    RentStatus = b.RentStatus ?? Enums.RentStatus.Active,
                 });
 
             return await bookinDto.ToListAsync();
@@ -135,7 +135,9 @@ namespace LibraryServer.Service
             var myActiveRent = await _context.BookReservations
                 .Include(b => b.User)
                 .Include(b => b.Book)
-                .Where(b => b.UserId == userId && b.RentStatus == Enums.RentStatus.Active)
+                .Where(b => b.UserId == userId && 
+                (b.BookingStatus == Enums.BookingStatus.Pending || 
+                 b.BookingStatus == Enums.BookingStatus.Issued))
                 .ToListAsync();
 
             var myActiveRentDto = myActiveRent.Select(b => new BookReservationGetAll
@@ -153,34 +155,78 @@ namespace LibraryServer.Service
 
             return myActiveRentDto.ToList();
         }
-
         public async Task<Enums.RentStatus> ReturnBook(ReturnBookDto returnBookDto)
         {
-            if(returnBookDto.RentalId is null)
+            if (returnBookDto.RentalId is null)
             {
                 throw new ArgumentNullException(nameof(returnBookDto.RentalId));
             }
 
-            var rentalBook = await _context.BookReservations.FindAsync(returnBookDto.RentalId);
+            var rentalBook = await _context.BookReservations
+                .Include(r => r.Book)
+                .FirstOrDefaultAsync(r => r.Id == returnBookDto.RentalId);
 
-            if (rentalBook is null) throw new Exception("Current rent not found");
+            if (rentalBook is null)
+                throw new Exception("Current rent not found");
 
-            var book = await _context.Books.FindAsync(rentalBook.BookId);
+            var book = rentalBook.Book;
 
-            if(book is null)
+            if (book is null)
             {
                 throw new Exception("Book not found");
             }
 
-            book.Count += 1;
+            if (rentalBook.BookingStatus == Enums.BookingStatus.Pending)
+            {
+                rentalBook.BookingStatus = Enums.BookingStatus.Cancelled;
+                rentalBook.RentStatus = null;
 
-            if (book.InStock == false && book.Count > 0) book.InStock = true;
+                book.Count += 1;
+                if (book.InStock == false && book.Count > 0)
+                    book.InStock = true;
 
-            rentalBook.RentStatus = rentalBook.EndReservation < DateTime.Now.Date ? 
-                Enums.RentStatus.Expired : Enums.RentStatus.Pass;
+                await _context.SaveChangesAsync();
+                throw new Exception("Бронь отменена"); 
+            }
+            else if (rentalBook.BookingStatus == Enums.BookingStatus.Issued)
+            {
+                book.Count += 1;
+
+                if (book.InStock == false && book.Count > 0)
+                    book.InStock = true;
+
+                var rentStatus = rentalBook.EndReservation < DateTime.Now.Date ?
+                    Enums.RentStatus.Expired : Enums.RentStatus.Pass;
+
+                rentalBook.RentStatus = rentStatus;
+                rentalBook.BookingStatus = Enums.BookingStatus.Returned; 
+
+                await _context.SaveChangesAsync();
+                return rentStatus;
+            }
+            else
+            {
+                throw new Exception("Невозможно вернуть книгу в текущем статусе");
+            }
+        }
+        public async Task<bool> IssueBook(IssueBookDTO issueBookDTO)
+        {
+            var reservation = await _context.BookReservations
+                .FindAsync(issueBookDTO.BookingId);
+
+            if (reservation == null)
+                throw new Exception("Бронь не найдена");
+
+            if (reservation.BookingStatus != Enums.BookingStatus.Pending)
+                throw new Exception("Книга уже выдана или отменена");
+
+            reservation.BookingStatus = Enums.BookingStatus.Issued;
+            reservation.RentStatus = Enums.RentStatus.Active;
+            reservation.StartReservation = DateTime.Now;
+            reservation.EndReservation = issueBookDTO.DateEnd; 
 
             await _context.SaveChangesAsync();
-            return rentalBook.RentStatus;
+            return true;
         }
     }
 }
