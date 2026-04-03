@@ -1,15 +1,16 @@
+using DotNetEnv;
 using LibraryServer.DbContext;
 using LibraryServer.Model;
 using LibraryServer.Service;
 using LibraryServer.Tools;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using System.Reflection;
-using System.Text;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
-using DotNetEnv;
+using System.Reflection;
+using System.Text;
 
 Env.Load();
 
@@ -176,6 +177,14 @@ app.UseSwaggerUI(c =>
 
 app.UseCors();
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+    RequestPath = ""
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

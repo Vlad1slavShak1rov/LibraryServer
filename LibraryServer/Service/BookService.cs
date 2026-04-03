@@ -59,6 +59,7 @@ namespace LibraryServer.Service
 
         public async Task<string> UploadImage(int bookId, IFormFile file)
         {
+            // Создаем папку если нет
             var bookFolder = Path.Combine(_env.WebRootPath, "resources", "book", bookId.ToString());
 
             if (!Directory.Exists(bookFolder))
@@ -72,7 +73,22 @@ namespace LibraryServer.Service
                 await file.CopyToAsync(stream);
             }
 
-            return $"/resources/book/{bookId}/{fileName}";
+            string path = $"/resources/book/{bookId}/{fileName}";
+            var book = await _context.Books.FindAsync(bookId);
+            if (book != null)
+            {
+                if (!string.IsNullOrEmpty(book.ImagePath))
+                {
+                    var oldPath = Path.Combine(_env.WebRootPath, book.ImagePath.TrimStart('/'));
+                    if (File.Exists(oldPath))
+                        File.Delete(oldPath);
+                }
+
+                book.ImagePath = path;
+                await _context.SaveChangesAsync();
+            }
+
+            return path;
         }
 
         public async Task<BookDTO> GetById(int? id)
