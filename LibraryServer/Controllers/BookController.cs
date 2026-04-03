@@ -37,6 +37,22 @@ namespace LibraryServer.Controllers
             }
         }
 
+        [HttpPost("{bookId}/image")]
+        public async Task<IActionResult> UploadImage(int bookId, IFormFile file)
+        {
+            try
+            {
+                var path = await _bookService.UploadImage(bookId, file);
+                return Ok(new { imagePath = path });
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new {msg = ex.Message});
+            }
+           
+        }
+
         [Authorize(Roles = "Librarian")]
         [HttpPost]
         public async Task<IActionResult> AddBook(AddBookDTO addBookDTO)

@@ -1,8 +1,11 @@
-﻿using LibraryServer.DbContext;
+﻿using DotNetEnv;
+using LibraryServer.DbContext;
 using LibraryServer.DTO.Book;
 using LibraryServer.Model;
 using LibraryServer.Tools;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 namespace LibraryServer.Service
 {
@@ -10,10 +13,12 @@ namespace LibraryServer.Service
     {
         private readonly LibraryContext _context;
         private readonly CheckBookHelper _checkBookHelper;
-        public BookService(LibraryContext context, CheckBookHelper checkBookHelper)
+        private readonly IWebHostEnvironment _env;
+        public BookService(LibraryContext context, CheckBookHelper checkBookHelper, IWebHostEnvironment env)
         {
             _context = context;
             _checkBookHelper = checkBookHelper;
+            _env = env;
         }
 
         public async Task<List<BookDTO>> GetAll(string? searchText = null, string? sortedBy = null)
@@ -50,6 +55,24 @@ namespace LibraryServer.Service
             }
 
             return await books.ToListAsync();
+        }
+
+        public async Task<string> UploadImage(int bookId, IFormFile file)
+        {
+            var bookFolder = Path.Combine(_env.WebRootPath, "resources", "book", bookId.ToString());
+
+            if (!Directory.Exists(bookFolder))
+                Directory.CreateDirectory(bookFolder);
+
+            var fileName = $"image{Path.GetExtension(file.FileName)}";
+            var filePath = Path.Combine(bookFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return $"/resources/book/{bookId}/{fileName}";
         }
 
         public async Task<BookDTO> GetById(int? id)
