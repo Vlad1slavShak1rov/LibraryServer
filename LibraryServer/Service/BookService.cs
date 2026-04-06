@@ -23,35 +23,39 @@ namespace LibraryServer.Service
 
         public async Task<List<BookDTO>> GetAll(string? searchText = null, string? sortedBy = null)
         {
-            IQueryable<BookDTO> books = _context.Books
-               .Include(b => b.Author)
-               .Select(b => new BookDTO
-               {
-                   Id = b.Id,
-                   Title = b.Title,
-                   AuthorName = $"{b.Author.SecondName} {b.Author.FirstName} {b.Author.LastName}",
-                   InStock = b.InStock,
-                   TotalRate = b.TotalRate,
-                   Description = b.Description,
-                   Genre = b.Genre,
-                   count = b.Count,
-                   ImagePath = b.ImagePath,
-               });
+            var query = _context.Books
+                .Include(b => b.Author)
+                .AsQueryable();
 
-            if(!string.IsNullOrEmpty(sortedBy))
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                query = query.Where(b =>
+                    EF.Functions.Like(b.Title, $"%{searchText}%") ||
+                    EF.Functions.Like(b.Genre, $"%{searchText}%"));
+            }
+
+            var books = query.Select(b => new BookDTO
+            {
+                Id = b.Id,
+                Title = b.Title,
+                AuthorName = $"{b.Author.SecondName} {b.Author.FirstName} {b.Author.LastName}",
+                InStock = b.InStock,
+                TotalRate = b.TotalRate,
+                Description = b.Description,
+                Genre = b.Genre,
+                count = b.Count,
+                ImagePath = b.ImagePath,
+            });
+
+            if (!string.IsNullOrEmpty(sortedBy))
             {
                 books = sortedBy switch
                 {
                     "byBookName" => books.OrderBy(b => b.Title),
-                    "byAuthor" => books.OrderBy(b=>b.AuthorName),
-                    "byInStock" => books.OrderBy(b=>b.InStock),
+                    "byAuthor" => books.OrderBy(b => b.AuthorName),
+                    "byInStock" => books.OrderBy(b => b.InStock),
                     _ => books.OrderBy(b => b.Id),
                 };
-            }
-
-            if (!string.IsNullOrEmpty(searchText))
-            {
-                books = books.Where(b => b.Genre.StartsWith(searchText.ToLower()) || b.Title.StartsWith(searchText.ToLower()));
             }
 
             return await books.ToListAsync();
