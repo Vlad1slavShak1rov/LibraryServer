@@ -1,5 +1,6 @@
 ﻿using LibraryServer.DTO.Authorization;
 using LibraryServer.DTO.User;
+using LibraryServer.Enums;
 using LibraryServer.Service;
 using LibraryServer.Tools;
 using Microsoft.AspNetCore.Authorization;
@@ -20,9 +21,9 @@ namespace LibraryServer.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll(string? sortedBy = null, string? searchText = null)
+        public async Task<IActionResult> GetAll(string? sortedBy = null, string? searchText = null, Role? role = null)
         {
-            var list = await _userService.GetAll(sortedBy, searchText);
+            var list = await _userService.GetAll(sortedBy, searchText, role);
             return Ok(list);
         }
 
@@ -47,8 +48,8 @@ namespace LibraryServer.Controllers
         {
             try
             {
-                var isSuccessfully = await _userService.Registration(registrationDTO);
-                return Ok(new { isSuccessfully });
+                var userId = await _userService.Registration(registrationDTO);
+                return Ok(new { userId });
             }
             catch (Exception ex)
             {

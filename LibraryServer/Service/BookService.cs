@@ -66,6 +66,8 @@ namespace LibraryServer.Service
             // Создаем папку если нет
             var bookFolder = Path.Combine(_env.WebRootPath, "resources", "book", bookId.ToString());
 
+            Console.WriteLine(bookFolder);
+
             if (!Directory.Exists(bookFolder))
                 Directory.CreateDirectory(bookFolder);
 
@@ -177,7 +179,7 @@ namespace LibraryServer.Service
             };
         }
 
-        public async Task<BookDTO> EditBook(BookDTO? editBook)
+        public async Task<BookDTO> EditBook(EditBookDTO? editBook)
         {
             if (editBook == null)
                 throw new ArgumentNullException(nameof(editBook));

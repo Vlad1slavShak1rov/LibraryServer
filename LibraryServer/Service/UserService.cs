@@ -2,6 +2,7 @@
 using LibraryServer.DbContext;
 using LibraryServer.DTO.Authorization;
 using LibraryServer.DTO.User;
+using LibraryServer.Enums;
 using LibraryServer.Model;
 using LibraryServer.Tools;
 using Microsoft.AspNetCore.Authorization;
@@ -19,38 +20,50 @@ namespace LibraryServer.Service
             _jwtCreater = jwtCreater;
         }
 
-        public async Task<List<UserDTO>> GetAll(string? sortedBy = null, string? searchText = null)
+        public async Task<List<UserFullDTO>> GetAll(string? sortedBy = null, string? searchText = null, Role? role = null)
         {
-            IQueryable<UserDTO> query = _context.Users
-                .Where(u=>u.Role == Enums.Role.Student)
-                .Select(u=> new UserDTO
-                {
-                    Id = u.Id,
-                    Login = u.Login,
-                    Role = u.Role
-                });
+            var query = _context.Users
+                .Include(u => u.Student)
+                .Include(u => u.Teacher)
+                .AsQueryable();
 
+            // фильтр по роли
+            if (role.HasValue)
+            {
+                query = query.Where(u => u.Role == role.Value);
+            }
 
+            // поиск
             if (!string.IsNullOrWhiteSpace(searchText))
             {
-                query = query.Where(u => u.Login.ToLower().StartsWith(searchText.ToLower()));
+                query = query.Where(u => u.Login.ToLower().Contains(searchText.ToLower()));
             }
 
-            if (!string.IsNullOrWhiteSpace(sortedBy))
+            // сортировка
+            query = sortedBy?.ToLower() switch
             {
-                query = sortedBy.ToLower() switch
-                {
-                    "byname" => query.OrderBy(u => u.Login),
-                    "bydescname" => query.OrderByDescending(u => u.Login),
-                    _ => query.OrderBy(u => u.Id)
-                };
-            }
-            else
-            {
-                query = query.OrderBy(u => u.Id);
-            }
+                "byname" => query.OrderBy(u => u.Login),
+                "bydescname" => query.OrderByDescending(u => u.Login),
+                _ => query.OrderBy(u => u.Id)
+            };
 
-            return await query.ToListAsync();
+            return await query.Select(u => new UserFullDTO
+            {
+                Id = u.Id,
+                Login = u.Login,
+                Role = u.Role,
+
+                FullName =
+                    u.Role == Enums.Role.Student && u.Student != null
+                        ? $"{u.Student.SecondName} {u.Student.FirstName} {u.Student.LastName}"
+                        : u.Teacher != null
+                            ? $"{u.Teacher.SecondName} {u.Teacher.FirstName} {u.Teacher.LastName}"
+                            : "",
+
+                ClassNum = u.Role == Enums.Role.Student ? u.Student.ClassNum : null,
+
+                Contact = u.Role == Enums.Role.Teacher ? u.Teacher.Contact : null
+            }).ToListAsync();
         }
 
         public async Task<UserDTO?> GetById(int? id)
@@ -120,7 +133,7 @@ namespace LibraryServer.Service
             return jwt;
         }
 
-        public async Task<bool> Registration(RegistrationDTO registrationDTO)
+        public async Task<int> Registration(RegistrationDTO registrationDTO)
         {
             string login = registrationDTO.Login;
             string password = registrationDTO.Password;
@@ -148,38 +161,7 @@ namespace LibraryServer.Service
             await _context.Users.AddAsync(newUser);
             await _context.SaveChangesAsync();
 
-            switch (newUser.Role)
-            {
-                case Enums.Role.Student:
-                    var student = new Student
-                    {
-                        UserID = newUser.Id,
-                        IsProfileComplete = false
-                    };
-                    await _context.Students.AddAsync(student);
-                    break;
-
-                case Enums.Role.Teacher:
-                    var teacher = new Teacher
-                    {
-                        UserID = newUser.Id,
-                        IsProfileComplete = false
-                    };
-                    await _context.Teachers.AddAsync(teacher);
-                    break;
-            }
-
-            await _context.SaveChangesAsync();
-
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, newUser.Id.ToString()),
-                new Claim(ClaimTypes.Name, login),
-                new Claim(ClaimTypes.Role, newUser.Role.ToString()),
-                new Claim("IsProfileComplete", "false")
-            };
-
-            return true;
+            return newUser.Id;
         }
 
         public async Task<string> UpdateLogin(string? login, int? id)

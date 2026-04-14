@@ -50,28 +50,28 @@ namespace LibraryServer.Service
                 throw new Exception("Last name is required!");
 
             if (string.IsNullOrEmpty(studentDTO.ClassNum))
-                throw new Exception("Contact is required!");
+                throw new Exception("ClassNum is required!");
 
-            if (studentDTO.IsProfileComplete)
-                throw new Exception("Teacher has already been registered!");
+            var exists = await _context.Teachers
+                .AnyAsync(t => t.UserID == studentDTO.UserID);
 
-            if (studentDTO.UserID == null)
-                throw new Exception("User id is required!");
+            if (exists)
+                throw new Exception("Student profile already exists for this user!");
 
-            var teacher = new Teacher()
+            var student = new Student()
             {
                 UserID = studentDTO.UserID.Value,
                 FirstName = studentDTO.FirstName,
                 SecondName = studentDTO.SecondName,
                 LastName = studentDTO.LastName,
-                Contact = studentDTO.ClassNum,
+                ClassNum = studentDTO.ClassNum,
                 IsProfileComplete = true
             };
 
-            await _context.Teachers.AddAsync(teacher);
+            await _context.Students.AddAsync(student);
             await _context.SaveChangesAsync();
 
-            return teacher.Id;
+            return student.Id;
         }
 
         public async Task<StudentDTO> UpdateStudent(StudentDTO studentDTO)

@@ -43,7 +43,7 @@ namespace LibraryServer.Service
             if (string.IsNullOrEmpty(teacherDTO.FirstName))
                 throw new Exception("First name is required!");
 
-            if(string.IsNullOrEmpty(teacherDTO.SecondName))
+            if (string.IsNullOrEmpty(teacherDTO.SecondName))
                 throw new Exception("Second name is required!");
 
             if (string.IsNullOrEmpty(teacherDTO.LastName))
@@ -52,11 +52,14 @@ namespace LibraryServer.Service
             if (string.IsNullOrEmpty(teacherDTO.Contact))
                 throw new Exception("Contact is required!");
 
-            if (teacherDTO.IsProfileComplete)
-                throw new Exception("Teacher has already been registered!");
-            
-            if(teacherDTO.UserId == null)
+            if (teacherDTO.UserId == null)
                 throw new Exception("User id is required!");
+
+            var exists = await _context.Teachers
+                .AnyAsync(t => t.UserID == teacherDTO.UserId);
+
+            if (exists)
+                throw new Exception("Teacher profile already exists for this user!");
 
             var teacher = new Teacher()
             {

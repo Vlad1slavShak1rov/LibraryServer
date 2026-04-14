@@ -71,7 +71,7 @@ namespace LibraryServer.Controllers
 
         [Authorize(Roles = "Librarian")]
         [HttpPut]
-        public async Task<IActionResult> UpdateBook(BookDTO bookDTO)
+        public async Task<IActionResult> UpdateBook(EditBookDTO bookDTO)
         {
             try
             {
