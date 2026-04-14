@@ -9,9 +9,11 @@ namespace LibraryServer.Model
         public int Id { get; set;  }
         public int CreaterID { get; set; }
         public DateTime StartDate { get; set; }
+        public string NameEvent { get; set; }
         public string Description { get; set; }
 
         [ForeignKey("CreaterID")]
         public virtual User Creater { get; set;  }
+        public virtual List<EventPhoto> EventPhoto { get; set; }
     }
 }

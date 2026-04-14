@@ -9,7 +9,7 @@ namespace LibraryServer.Service
     {
         private readonly LibraryContext _context;
         private readonly FileTools _fileTools;
-        public AuthorService(LibraryContext context, FileTools fileTools)
+        public AuthorService(LibraryContext context, FileTools fileTools = null)
         {
             _context = context;
             _fileTools = fileTools;
