@@ -105,7 +105,7 @@ namespace LibraryServer.Controllers
             }
         }
 
-        [HttpGet("{userId}")]
+        [HttpGet("user/{userId}")]
         [Authorize]
         public async Task<IActionResult> GetUserEvents([FromRoute] int userId)
         {
