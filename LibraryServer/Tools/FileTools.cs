@@ -44,6 +44,64 @@ namespace LibraryServer.Tools
             return path;
         }
 
+        public async Task<EventPhoto> UploadEventPhoto(int eventId, IFormFile file, LibraryContext context)
+        {
+            var path = await SaveFile(eventId, file, "events");
+
+            var eventPhoto = new EventPhoto
+            {
+                EventId = eventId,
+                Path = path
+            };
+
+            context.EventPhoto.Add(eventPhoto);
+            await context.SaveChangesAsync();
+
+            return eventPhoto;
+        }
+
+        public async Task<List<EventPhoto>> UploadEventPhotos(int eventId, List<IFormFile> files, LibraryContext context)
+        {
+            var photos = new List<EventPhoto>();
+
+            foreach (var file in files)
+            {
+                var photo = await UploadEventPhoto(eventId, file, context);
+                photos.Add(photo);
+            }
+
+            return photos;
+        }
+
+        public async Task<bool> DeleteEventPhoto(int photoId, LibraryContext context)
+        {
+            var photo = await context.EventPhoto.FindAsync(photoId);
+            if (photo == null)
+                throw new Exception("Фото не найдено");
+
+            DeleteOldFile(photo.Path);
+            context.EventPhoto.Remove(photo);
+            await context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> DeleteAllEventPhotos(int eventId, LibraryContext context)
+        {
+            var photos = await context.EventPhoto
+                .Where(p => p.EventId == eventId)
+                .ToListAsync();
+
+            foreach (var photo in photos)
+            {
+                DeleteOldFile(photo.Path);
+                context.EventPhoto.Remove(photo);
+            }
+
+            await context.SaveChangesAsync();
+            return true;
+        }
+
         private async Task<string> SaveFile(int id, IFormFile file, string folderName)
         {
             var folder = Path.Combine(_env.WebRootPath, "resources", folderName, id.ToString());
