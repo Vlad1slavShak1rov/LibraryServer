@@ -1,15 +1,18 @@
 ﻿using LibraryServer.DbContext;
 using LibraryServer.DTO.Author;
 using LibraryServer.Model;
+using LibraryServer.Tools;
 using Microsoft.EntityFrameworkCore;
 namespace LibraryServer.Service
 {
     public class AuthorService
     {
         private readonly LibraryContext _context;
-        public AuthorService(LibraryContext context)
+        private readonly FileTools _fileTools;
+        public AuthorService(LibraryContext context, FileTools fileTools)
         {
             _context = context;
+            _fileTools = fileTools;
         }
 
         public async Task<List<AuthorDTO>> GetAll(string? searchText = null, string? sortedBy = null)
@@ -46,6 +49,11 @@ namespace LibraryServer.Service
 
 
             return await authors.ToListAsync();
+        }
+
+        public async Task<string> UploadImage(int authorId, IFormFile file)
+        {
+            return await _fileTools.UploadAuthorPhoto(authorId, file, _context);
         }
 
         public async Task<AuthorDTO> GetById(int? id)

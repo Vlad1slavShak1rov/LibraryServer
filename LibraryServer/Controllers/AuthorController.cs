@@ -38,6 +38,20 @@ namespace LibraryServer.Controllers
            
         }
 
+        [HttpPost("{authorId}/image")]
+        [Authorize(Roles = "Librarian")]
+        public async Task<IActionResult> LoadImage([FromRoute] int authorId, [FromBody] IFormFile file)
+        {
+            try
+            {
+                var path = await _authorService.UploadImage(authorId, file);
+                return Ok(new {path = path });
+            } catch(Exception ex)
+            {
+                return BadRequest(new { msg = ex.Message });
+            }
+        }
+
         [HttpPost]
         [Authorize(Roles = "Librarian")]
         public async Task<IActionResult> CreateAuthor([FromBody] AuthorDTO authorDTO)

@@ -13,11 +13,13 @@ namespace LibraryServer.Service
     {
         private readonly LibraryContext _context;
         private readonly CheckBookHelper _checkBookHelper;
+        private readonly FileTools _fileTools;
         private readonly IWebHostEnvironment _env;
-        public BookService(LibraryContext context, CheckBookHelper checkBookHelper, IWebHostEnvironment env)
+        public BookService(LibraryContext context, CheckBookHelper checkBookHelper, FileTools fileTools ,IWebHostEnvironment env)
         {
             _context = context;
             _checkBookHelper = checkBookHelper;
+            _fileTools = fileTools;
             _env = env;
         }
 
@@ -63,36 +65,7 @@ namespace LibraryServer.Service
 
         public async Task<string> UploadImage(int bookId, IFormFile file)
         {
-            // Создаем папку если нет
-            var bookFolder = Path.Combine(_env.WebRootPath, "resources", "book", bookId.ToString());
-
-            if (!Directory.Exists(bookFolder))
-                Directory.CreateDirectory(bookFolder);
-
-            var fileName = $"image{Path.GetExtension(file.FileName)}";
-            var filePath = Path.Combine(bookFolder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            string path = $"/resources/book/{bookId}/{fileName}";
-            var book = await _context.Books.FindAsync(bookId);
-            if (book != null)
-            {
-                if (!string.IsNullOrEmpty(book.ImagePath))
-                {
-                    var oldPath = Path.Combine(_env.WebRootPath, book.ImagePath.TrimStart('/'));
-                    if (File.Exists(oldPath))
-                        File.Delete(oldPath);
-                }
-
-                book.ImagePath = path;
-                await _context.SaveChangesAsync();
-            }
-
-            return path;
+            return await _fileTools.UploadBookImage(bookId, file, _context);
         }
 
         public async Task<BookDTO> GetById(int? id)
