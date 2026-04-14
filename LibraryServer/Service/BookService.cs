@@ -13,11 +13,13 @@ namespace LibraryServer.Service
     {
         private readonly LibraryContext _context;
         private readonly CheckBookHelper _checkBookHelper;
+        private readonly FileTools _fileTools;
         private readonly IWebHostEnvironment _env;
-        public BookService(LibraryContext context, CheckBookHelper checkBookHelper, IWebHostEnvironment env)
+        public BookService(LibraryContext context, CheckBookHelper checkBookHelper, FileTools fileTools ,IWebHostEnvironment env)
         {
             _context = context;
             _checkBookHelper = checkBookHelper;
+            _fileTools = fileTools;
             _env = env;
         }
 
@@ -65,8 +67,6 @@ namespace LibraryServer.Service
         {
             // Создаем папку если нет
             var bookFolder = Path.Combine(_env.WebRootPath, "resources", "book", bookId.ToString());
-
-            Console.WriteLine(bookFolder);
 
             if (!Directory.Exists(bookFolder))
                 Directory.CreateDirectory(bookFolder);
