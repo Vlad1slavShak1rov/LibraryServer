@@ -1,6 +1,7 @@
 ﻿using LibraryServer.DbContext;
 using LibraryServer.DTO.Event;
 using LibraryServer.Model;
+using LibraryServer.Tools;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryServer.Service
@@ -8,10 +9,12 @@ namespace LibraryServer.Service
     public class EventService
     {
         private readonly LibraryContext _context;
+        private readonly FileTools _fileTools;
 
-        public EventService(LibraryContext context)
+        public EventService(LibraryContext context, FileTools fileTools)
         {
             _context = context;
+            _fileTools = fileTools;
         }
         public async Task<List<EventResponseDto>> GetAll(string? search = null, string? sort = null)
         {
@@ -114,6 +117,19 @@ namespace LibraryServer.Service
             return await GetById(ev.Id);
         }
 
+        public async Task<List<EventPhotoResponseDto>> GetEventPhotos(int eventId)
+        {
+            var photos = await _context.EventPhoto
+                .Where(p => p.EventId == eventId)
+                .ToListAsync();
+
+            return photos.Select(p => new EventPhotoResponseDto
+            {
+                Id = p.Id,
+                EventId = p.EventId,
+                Path = p.Path
+            }).ToList();
+        }
         public async Task<bool> Delete(int id)
         {
             var ev = await _context.Events.FindAsync(id);
@@ -146,6 +162,20 @@ namespace LibraryServer.Service
                 CreaterID = e.CreaterID,
                 CreaterName = e.Creater?.Login,
             }).ToList();
+        }
+
+        public async Task<EventPhoto> UploadPhoto(int eventId, IFormFile file)
+        {
+            var photo = await _fileTools.UploadEventPhoto(eventId, file, _context);
+
+            return photo;
+        }
+
+        public async Task<bool> DeletePhoto(int photoId)
+        {
+            var res = await _fileTools.DeleteEventPhoto(photoId, _context);
+
+            return res;
         }
     }
 }

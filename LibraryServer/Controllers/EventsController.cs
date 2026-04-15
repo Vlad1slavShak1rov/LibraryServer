@@ -1,7 +1,9 @@
 ﻿using LibraryServer.DTO.Event;
 using LibraryServer.Service;
+using LibraryServer.Tools;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibraryServer.Controllers
 {
@@ -47,7 +49,7 @@ namespace LibraryServer.Controllers
         }
 
         [HttpPost("create")]
-        [Authorize(Roles = "Librarian, Teacher")]
+        [Authorize(Roles = "Librarian")]
         public async Task<IActionResult> CreateEvent([FromBody] CreateEventDto createEventDto)
         {
             try
@@ -67,7 +69,7 @@ namespace LibraryServer.Controllers
         }
 
         [HttpPatch("update")]
-        [Authorize(Roles = "Librarian, Teacher")]
+        [Authorize(Roles = "Librarian")]
         public async Task<IActionResult> UpdateEvent([FromBody] UpdateEventDto updateEventDto)
         {
             try
@@ -78,6 +80,60 @@ namespace LibraryServer.Controllers
                     msg = "Мероприятие обновлено",
                     access = true,
                     data = updatedEvent
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { msg = ex.Message, access = false });
+            }
+        }
+
+        [HttpPost("{eventId}/upload-photo")]
+        [Authorize(Roles = "Librarian, Teacher")]
+        public async Task<IActionResult> UploadEventPhoto([FromRoute] int eventId, IFormFile file)
+        {
+            try
+            {
+                var photo = await _eventService.UploadPhoto(eventId, file);
+                return Ok(new
+                {
+                    msg = "Фото загружено",
+                    access = true,
+                    data = new { photo.Id, photo.Path }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { msg = ex.Message, access = false });
+            }
+        }
+
+        [HttpGet("{eventId}/photos")]
+        [Authorize]
+        public async Task<IActionResult> GetEventPhotos([FromRoute] int eventId)
+        {
+            try
+            {
+                var photos = await _eventService.GetEventPhotos(eventId);
+                return Ok(photos);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { msg = ex.Message });
+            }
+        }
+
+        [HttpDelete("photo/{photoId}")]
+        [Authorize(Roles = "Librarian, Teacher")]
+        public async Task<IActionResult> DeleteEventPhoto([FromRoute] int photoId)
+        {
+            try
+            {
+                var result = await _eventService.DeletePhoto(photoId);
+                return Ok(new
+                {
+                    msg = "Фото удалено",
+                    access = result
                 });
             }
             catch (Exception ex)
