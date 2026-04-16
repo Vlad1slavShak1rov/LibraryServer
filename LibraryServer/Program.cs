@@ -37,6 +37,7 @@ builder.Services.AddScoped<OpenRouteService>();
 builder.Services.AddScoped<BookigBookService>();
 builder.Services.AddScoped<FileTools>(); 
 builder.Services.AddScoped<EventService>();
+builder.Services.AddScoped<MaterialService>();
 
 builder.Services.AddEndpointsApiExplorer();
 

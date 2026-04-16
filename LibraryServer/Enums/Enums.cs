@@ -20,6 +20,11 @@
         Issued = 1,    // Выдана
         Cancelled = 2,  // Отменена
         Returned = 3,  // Возвращена
+    }
 
+    public enum Subject
+    {
+        RussianLand = 0, // Русский язык
+        Literature = 1, //Литература
     }
 }
