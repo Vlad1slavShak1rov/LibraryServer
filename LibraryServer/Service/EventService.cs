@@ -177,5 +177,11 @@ namespace LibraryServer.Service
 
             return res;
         }
+
+        public async Task<EventPhoto> UpdatePhoto(int photoId, IFormFile newFile)
+        {
+            var photo = await _fileTools.UpdateEventPhoto(photoId, newFile, _context);
+            return photo;
+        }
     }
 }

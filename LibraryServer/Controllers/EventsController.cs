@@ -108,6 +108,26 @@ namespace LibraryServer.Controllers
             }
         }
 
+        [HttpPut("photo/{photoId}")]
+        [Authorize(Roles = "Librarian, Teacher")]
+        public async Task<IActionResult> UpdateEventPhoto([FromRoute] int photoId, IFormFile file)
+        {
+            try
+            {
+                var photo = await _eventService.UpdatePhoto(photoId, file);
+                return Ok(new
+                {
+                    msg = "Фото обновлено",
+                    access = true,
+                    data = new { photo.Id, photo.Path }
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { msg = ex.Message, access = false });
+            }
+        }
+
         [HttpGet("{eventId}/photos")]
         [Authorize]
         public async Task<IActionResult> GetEventPhotos([FromRoute] int eventId)

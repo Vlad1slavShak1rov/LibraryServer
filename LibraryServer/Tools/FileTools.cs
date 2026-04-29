@@ -125,5 +125,19 @@ namespace LibraryServer.Tools
             if (File.Exists(fullPath))
                 File.Delete(fullPath);
         }
+        public async Task<EventPhoto> UpdateEventPhoto(int photoId, IFormFile newFile, LibraryContext context)
+        {
+            var oldPhoto = await context.EventPhoto.FindAsync(photoId);
+            if (oldPhoto == null)
+                throw new Exception("Фото не найдено");
+
+            DeleteOldFile(oldPhoto.Path);
+
+            var newPath = await SaveFile(oldPhoto.EventId, newFile, "events");
+            oldPhoto.Path = newPath;
+            await context.SaveChangesAsync();
+
+            return oldPhoto;
+        }
     }
 }
