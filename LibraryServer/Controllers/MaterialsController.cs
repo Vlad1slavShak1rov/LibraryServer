@@ -1,4 +1,5 @@
-﻿using LibraryServer.Service;
+﻿using LibraryServer.DTO.Material;
+using LibraryServer.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -55,6 +56,23 @@ namespace LibraryServer.Controllers
             {
                 var path = await _materialService.UploadMaterial(uploadMaterialDto);
                 return Ok(new { msg = "Материал загружен", path = path });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { msg = ex.Message });
+            }
+        }
+
+        [HttpPut("update/{id}")]
+        [RequestSizeLimit(100 * 1024 * 1024)]
+        [RequestFormLimits(MultipartBodyLengthLimit = 100 * 1024 * 1024)]
+        [Authorize(Roles = "Librarian, Teacher")]
+        public async Task<IActionResult> UpdateMaterial([FromRoute] int id, [FromForm] UpdateMaterialsDto dto)
+        {
+            try
+            {
+                var material = await _materialService.UpdateMaterial(id, dto.Name, dto.File);
+                return Ok(new { msg = "Материал обновлен", data = material });
             }
             catch (Exception ex)
             {

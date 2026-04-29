@@ -68,6 +68,42 @@ namespace LibraryServer.Service
             return relativePath;
         }
 
+        public async Task<Materials> UpdateMaterial(int materialId, string newName, IFormFile? newFile)
+        {
+            var material = await _context.Materials.FindAsync(materialId);
+            if (material == null)
+                throw new Exception("Материал не найден");
+
+            if (!string.IsNullOrEmpty(newName))
+                material.Name = newName;
+
+            if (newFile != null)
+            {
+                if (!newFile.FileName.EndsWith(".pdf"))
+                    throw new Exception("Только PDF файлы разрешены");
+
+                var oldFullPath = Path.Combine(_env.WebRootPath, material.Path.TrimStart('/'));
+                if (File.Exists(oldFullPath))
+                    File.Delete(oldFullPath);
+
+                var folder = Path.Combine(_env.WebRootPath, "materials", material.Subject.ToString());
+                Directory.CreateDirectory(folder);
+
+                var fileName = $"{DateTime.Now:yyyyMMddHHmmss}_{newFile.FileName}";
+                var filePath = Path.Combine(folder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await newFile.CopyToAsync(stream);
+                }
+
+                material.Path = $"/materials/{material.Subject}/{fileName}";
+            }
+
+            await _context.SaveChangesAsync();
+            return material;
+        }
+
         public async Task<bool> Delete(int id)
         {
             var material = await _context.Materials.FindAsync(id);
