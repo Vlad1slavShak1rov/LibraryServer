@@ -2,22 +2,3 @@
 Серверная часть информационной системы "Библиотека".
 Реализована на ASP.NET Core Web API.
 
-⚙️ Стек
-- C#
-- ASP.NET Core
-- Entity Framework Core
-- MS SQL Server
-- REST API
-
-📦 Функционал
-- CRUD для книг
-- CRUD для читателей
-- Учёт выдачи книг
-- Роли пользователей (если есть)
-- Авторизация (если есть)
-
-🔌 Примеры API
-GET /api/books
-POST /api/books
-PUT /api/books/{id}
-DELETE /api/books/{id}
