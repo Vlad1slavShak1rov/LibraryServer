@@ -108,7 +108,7 @@ namespace LibraryServer.Tools
             Directory.CreateDirectory(folder);
 
             var ext = Path.GetExtension(file.FileName);
-            var fileName = $"{DateTime.Now:yyyyMMddHHmmss}_{id}{ext}";
+            var fileName = $"{Guid.NewGuid()}{ext}";
             var filePath = Path.Combine(folder, fileName);
 
             using var stream = new FileStream(filePath, FileMode.Create);
