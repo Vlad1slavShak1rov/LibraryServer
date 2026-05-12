@@ -18,7 +18,7 @@ namespace LibraryServer.Model
 
         [ForeignKey("AuthorID")]
         public virtual Author Author { get; set; }
-
+        public virtual Forum Forum { get; set; }
         public virtual List<BookReservation> BookReservations {  get; set; }
         public virtual List<QuotesBooks> QuotesBooks { get; set; }
         public virtual List<ReviewBook> ReviewBooks { get; set; }

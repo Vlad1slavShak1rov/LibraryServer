@@ -3,6 +3,7 @@ using System;
 using LibraryServer.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryServer.Migrations
 {
     [DbContext(typeof(LibraryContext))]
-    partial class LibraryContextModelSnapshot : ModelSnapshot
+    [Migration("20260512172739_Update13052026")]
+    partial class Update13052026
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.2");
@@ -213,7 +216,7 @@ namespace LibraryServer.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("BookId")
+                    b.Property<int>("BookId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("CreaterID")
@@ -683,7 +686,9 @@ namespace LibraryServer.Migrations
                 {
                     b.HasOne("LibraryServer.Model.Book", "Book")
                         .WithOne("Forum")
-                        .HasForeignKey("LibraryServer.Model.Forum", "BookId");
+                        .HasForeignKey("LibraryServer.Model.Forum", "BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("LibraryServer.Model.User", "Creater")
                         .WithMany("Forums")

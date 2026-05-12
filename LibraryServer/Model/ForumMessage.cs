@@ -10,7 +10,6 @@ namespace LibraryServer.Model
         public int ForumId { get; set; }
         public int SenderId { get; set; }
         public string Message { get; set;  }
-        public string ApplicationPath { get; set; }
         public DateTime DateSend { get; set; }
 
         [ForeignKey("ForumId")]

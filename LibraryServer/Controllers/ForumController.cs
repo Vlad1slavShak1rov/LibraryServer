@@ -1,6 +1,7 @@
 ﻿using LibraryServer.DbContext;
 using LibraryServer.DTO.Forum;
 using LibraryServer.Model;
+using LibraryServer.Service;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -11,27 +12,16 @@ namespace LibraryServer.Controllers
     [Route("api/[controller]")]
     public class ForumController : ControllerBase
     {
-        private readonly LibraryContext _context;
-        public ForumController(LibraryContext context)
+        private readonly ForumService _forumService;
+        public ForumController(ForumService forumService)
         {
-            _context = context;
+           _forumService = forumService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<object>>> GetForums()
         {
-            var forums = await _context.Forums
-                .OrderByDescending(f => f.DateCreated)
-                .Select(f => new
-                {
-                    id = f.Id,
-                    createrID = f.CreaterID,
-                    title = f.Title,
-                    additionalInfo = f.AdditionalInfo,
-                    dateCreated = f.DateCreated
-                })
-                .ToListAsync();
-
+            var forums = await _forumService.GetAll();
             return Ok(forums);
         }
 
@@ -39,17 +29,7 @@ namespace LibraryServer.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<object>> GetForum(int id)
         {
-            var forum = await _context.Forums
-                .Where(f => f.Id == id)
-                .Select(f => new
-                {
-                    id = f.Id,
-                    createrID = f.CreaterID,
-                    title = f.Title,
-                    additionalInfo = f.AdditionalInfo,
-                    dateCreated = f.DateCreated
-                })
-                .FirstOrDefaultAsync();
+            var forum = await _forumService.GetById(id);
 
             if (forum == null)
                 return NotFound();
@@ -61,47 +41,48 @@ namespace LibraryServer.Controllers
         [HttpPost]
         public async Task<ActionResult<object>> CreateForum([FromBody] CreateForumDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Title))
-                return BadRequest("Title is required");
-
-            var forum = new Forum
+            try
             {
-                Title = dto.Title,
-                AdditionalInfo = dto.AdditionalInfo ?? "",
-                CreaterID = dto.CreaterID,
-                DateCreated = DateTime.UtcNow
-            };
+                var forum = await _forumService.CreateForum(dto);
 
-            _context.Forums.Add(forum);
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new
+                return Ok(new
+                {
+                    acces = true,
+                    msg = "Forum created!"
+                });
+            }
+            catch (Exception ex) 
             {
-                id = forum.Id,
-                createrID = forum.CreaterID,
-                title = forum.Title,
-                additionalInfo = forum.AdditionalInfo,
-                dateCreated = forum.DateCreated
-            });
+                return BadRequest(ex.Message);
+            }
+
+          
         }
 
         [HttpGet("messages/{forumId}")]
         public async Task<IActionResult> GetForumMessages(int forumId)
         {
-            var messages = await _context.ForumMessages
-                .Where(m => m.ForumId == forumId)
-                .OrderBy(m => m.DateSend)
-                .Select(m => new
-                {
-                    forumId = m.ForumId,
-                    senderId = m.SenderId,
-                    message = m.Message,
-                    date = m.DateSend
-                })
-                .ToListAsync();
+            try
+            {
+                var messages = _forumService.GetForumMessage(forumId);
+                return Ok(messages);
+            } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
-            return Ok(messages);
+        [HttpGet("byBookId/{id}")]
+        public async Task<IActionResult> GetByBookId(int bookId)
+        {
+            try
+            {
+                var forum = await _forumService.GetByBookId(bookId);
+                return Ok(forum);
+            } catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
