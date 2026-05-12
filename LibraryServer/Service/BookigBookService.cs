@@ -186,7 +186,7 @@ namespace LibraryServer.Service
                     book.InStock = true;
 
                 await _context.SaveChangesAsync();
-                throw new Exception("Бронь отменена"); 
+                return Enums.RentStatus.Pass;
             }
             else if (rentalBook.BookingStatus == Enums.BookingStatus.Issued)
             {

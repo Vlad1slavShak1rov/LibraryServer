@@ -7,6 +7,7 @@ namespace LibraryServer.DTO.Book
     public class BookDTO
     {
         public int Id { get; set; }
+        public int AuthorId { get; set; }
         public string AuthorName { get; set; }
         public string Genre { get; set; }
         public string Title { get; set; }

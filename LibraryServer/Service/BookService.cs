@@ -25,9 +25,7 @@ namespace LibraryServer.Service
 
         public async Task<List<BookDTO>> GetAll(string? searchText = null, string? sortedBy = null)
         {
-            var query = _context.Books
-                .Include(b => b.Author)
-                .AsQueryable();
+            var query = _context.Books.AsQueryable();
 
             if (!string.IsNullOrEmpty(searchText))
             {
@@ -36,11 +34,11 @@ namespace LibraryServer.Service
                     EF.Functions.Like(b.Genre, $"%{searchText}%"));
             }
 
-            var books = query.Select(b => new BookDTO
+            var booksQuery = query.Select(b => new BookDTO
             {
                 Id = b.Id,
                 Title = b.Title,
-                AuthorName = $"{b.Author.SecondName} {b.Author.FirstName} {b.Author.LastName}",
+                AuthorId = b.AuthorID,
                 InStock = b.InStock,
                 TotalRate = b.TotalRate,
                 Description = b.Description,
@@ -49,18 +47,19 @@ namespace LibraryServer.Service
                 ImagePath = b.ImagePath,
             });
 
-            if (!string.IsNullOrEmpty(sortedBy))
+            booksQuery = sortedBy switch
             {
-                books = sortedBy switch
-                {
-                    "byBookName" => books.OrderBy(b => b.Title),
-                    "byAuthor" => books.OrderBy(b => b.AuthorName),
-                    "byInStock" => books.OrderBy(b => b.InStock),
-                    _ => books.OrderBy(b => b.Id),
-                };
-            }
+                "byBookName" => booksQuery.OrderBy(b => b.Title),
 
-            return await books.ToListAsync();
+                // ❌ нельзя сортировать по AuthorName — его нет
+                "byAuthor" => booksQuery.OrderBy(b => b.AuthorId),
+
+                "byInStock" => booksQuery.OrderBy(b => b.InStock),
+
+                _ => booksQuery.OrderBy(b => b.Id),
+            };
+
+            return await booksQuery.ToListAsync();
         }
 
         public async Task<string> UploadImage(int bookId, IFormFile file)
@@ -106,9 +105,9 @@ namespace LibraryServer.Service
                 Title = book.Title,
                 TotalRate = book.TotalRate,
                 Description = book.Description,
+                AuthorId = book.AuthorID,
                 Genre = book.Genre,
                 ImagePath = book.ImagePath,
-                AuthorName = book.Author.FullName,
                 count = book.Count,
                 InStock = book.InStock,
             };
@@ -175,7 +174,7 @@ namespace LibraryServer.Service
                 ImagePath = book.ImagePath,
                 InStock = true,
                 TotalRate = 0,
-                AuthorName = $"{author.SecondName} {author.FirstName} {author.LastName}"
+                AuthorId =book.AuthorID,
             };
         }
 
