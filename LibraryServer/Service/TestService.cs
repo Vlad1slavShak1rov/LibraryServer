@@ -17,7 +17,7 @@ namespace LibraryServer.Service
             _deepSeekService = deepSeekService;
         }
 
-        public async Task<List<TestShortDTO>> GetAllTests(int userId)
+        public async Task<List<TestShortDTO>> GetAllTests()
         {
             return await _context.Tests
                 .Select(t => new TestShortDTO
@@ -27,12 +27,6 @@ namespace LibraryServer.Service
                     TestDescription = t.TestDescription,
 
                     QuestionCount = t.Questions.Count,
-
-                    UserPercent = _context.Results
-                        .Where(r => r.TestId == t.Id && r.UserId == userId)
-                        .OrderByDescending(r => r.CreatedAt)
-                        .Select(r => (double?)r.PercentSuccess)
-                        .FirstOrDefault()
                 })
                 .ToListAsync();
         }
@@ -77,35 +71,65 @@ namespace LibraryServer.Service
 
         public async Task<TestResultDTO> SubmitTest(SubmitTestDTO submitTest)
         {
+            // Получаем вопросы теста вместе с вариантами ответов
             var questions = await _context.QuestionTests
+                .Include(q => q.Options)
                 .Where(q => q.TestId == submitTest.TestId)
                 .ToListAsync();
-
-            var assigned = await _context.AssignedTest
-                .FirstOrDefaultAsync(x =>
-                    x.UserId == submitTest.UserId &&
-                    x.TestId == submitTest.TestId);
 
             if (!questions.Any())
                 throw new Exception("Test not found");
 
+            // Ищем назначенный тест
+            // В AssignedTest.StudentId хранится User.Id
+            var assigned = await _context.AssignedTest
+                .FirstOrDefaultAsync(x =>
+                    x.StudentId == submitTest.UserId &&
+                    x.TestId == submitTest.TestId);
+
+            // Подсчёт правильных ответов
             int correct = 0;
 
             foreach (var answer in submitTest.Answers)
             {
+                // Находим вопрос
                 var question = questions.FirstOrDefault(q => q.Id == answer.QuestionId);
 
                 if (question == null)
                     continue;
 
-                if (question.CorrectAnswer == answer.SelectedOption)
+                /*
+                 * В submitTest.Answers.SelectedOption приходит ID записи QuestionOption,
+                 * например 121, 127, 130 и т.д.
+                 *
+                 * В QuestionTest.CorrectAnswer хранится значение поля Order
+                 * правильного варианта (0, 1, 2, 3).
+                 *
+                 * Поэтому:
+                 * 1. Находим QuestionOption по Id == SelectedOption
+                 * 2. Берём его Order
+                 * 3. Сравниваем с CorrectAnswer
+                 */
+
+                var selectedOption = question.Options
+                    .FirstOrDefault(o => o.Id == answer.SelectedOption);
+
+                if (selectedOption == null)
+                    continue;
+
+                if (selectedOption.Order == question.CorrectAnswer)
+                {
                     correct++;
+                }
             }
 
             int total = questions.Count;
 
-            double percent = Math.Round((double)correct / total * 100, 2);
+            double percent = total == 0
+                ? 0
+                : Math.Round((double)correct / total * 100, 2);
 
+            // Сохраняем результат
             var result = new TestResult
             {
                 TestId = submitTest.TestId,
@@ -116,25 +140,16 @@ namespace LibraryServer.Service
 
             await _context.Results.AddAsync(result);
 
-            if (assigned == null)
-            {
-                assigned = new AssignedTest
-                {
-                    UserId = submitTest.UserId,
-                    TestId = submitTest.TestId,
-                    IsCompleted = true,
-                    AssignedAt = DateTime.UtcNow
-                };
-
-                await _context.AssignedTest.AddAsync(assigned);
-            }
-            else
+            // Отмечаем назначенный тест как выполненный
+            if (assigned != null)
             {
                 assigned.IsCompleted = true;
             }
 
+            // Сохраняем изменения
             await _context.SaveChangesAsync();
 
+            // Возвращаем результат
             return new TestResultDTO
             {
                 TestId = submitTest.TestId,
@@ -208,7 +223,7 @@ namespace LibraryServer.Service
                 };
 
                 await _context.Tests.AddAsync(test);
-                await _context.SaveChangesAsync();  
+                await _context.SaveChangesAsync();
 
                 var questions = new List<QuestionTest>();
                 foreach (var q in generatedTest.Questions)
@@ -258,11 +273,23 @@ namespace LibraryServer.Service
 
         public async Task<AssignedTest> AssignTest(AssignTestDTO dto)
         {
+            // Проверяем, не выдан ли уже этот тест этому ученику
+            var existing = await _context.AssignedTest
+                .FirstOrDefaultAsync(x =>
+                    x.StudentId == dto.StudentId &&
+                    x.TestId == dto.TestId);
+
+            if (existing != null)
+                throw new Exception("Этот тест уже назначен данному ученику.");
+
             var assignedTest = new AssignedTest
             {
-                UserId = dto.UserId,
+                StudentId = dto.StudentId,   // сюда передается User.Id ученика
+                TeacherId = dto.TeacherId,   // сюда передается User.Id учителя
                 TestId = dto.TestId,
-                DueDate = dto.DueDate
+                DueDate = dto.DueDate,
+                AssignedAt = DateTime.UtcNow,
+                IsCompleted = false
             };
 
             _context.AssignedTest.Add(assignedTest);
@@ -271,11 +298,70 @@ namespace LibraryServer.Service
             return assignedTest;
         }
 
-        public async Task<List<AssignedTest>> GetUserAssignedTests(int userId)
+        public async Task<List<AssignedTestDTO>> GetUserAssignedTests(int userId)
         {
             return await _context.AssignedTest
-                .Where(x => x.UserId == userId)
+                .Where(x => x.StudentId == userId)
                 .Include(x => x.Test)
+                .Select(x => new AssignedTestDTO
+                {
+                    Id = x.Id,
+                    TestId = x.TestId,
+                    TestName = x.Test.TestName,
+
+                    StudentId = x.StudentId,
+                    StudentName = x.Student.Login,
+
+                    TeacherId = x.TeacherId ?? 0,
+                    TeacherName = x.Teacher != null ? x.Teacher.Login : "",
+
+                    AssignedAt = x.AssignedAt,
+                    DueDate = x.DueDate,
+                    IsCompleted = x.IsCompleted,
+
+                    Percent = _context.Results
+                        .Where(r =>
+                            r.TestId == x.TestId &&
+                            r.UserId == x.StudentId)
+                        .OrderByDescending(r => r.CreatedAt)
+                        .Select(r => (double?)r.PercentSuccess)
+                        .FirstOrDefault()
+                })
+                .OrderByDescending(x => x.AssignedAt)
+                .ToListAsync();
+        }
+
+        public async Task<List<AssignedTestDTO>> GetAssignedTestsByTeacher(int teacherId)
+        {
+            return await _context.AssignedTest
+                .Where(x => x.TeacherId == teacherId)
+                .Include(x => x.Test)
+                .Include(x => x.Student)
+                .Include(x => x.Teacher)
+                .Select(x => new AssignedTestDTO
+                {
+                    Id = x.Id,
+
+                    TestId = x.TestId,
+                    TestName = x.Test.TestName,
+
+                    StudentId = x.StudentId,
+                    StudentName = x.Student.Login.ToString(), // или через Users
+
+                    TeacherId = x.TeacherId.Value,
+                    TeacherName = x.Teacher.Login.ToString(),
+
+                    AssignedAt = x.AssignedAt,
+                    DueDate = x.DueDate,
+                    IsCompleted = x.IsCompleted,
+
+                    Percent = _context.Results
+                        .Where(r => r.TestId == x.TestId && r.UserId == x.Student.Id)
+                        .OrderByDescending(r => r.CreatedAt)
+                        .Select(r => (double?)r.PercentSuccess)
+                        .FirstOrDefault()
+                })
+                .OrderByDescending(x => x.AssignedAt)
                 .ToListAsync();
         }
     }

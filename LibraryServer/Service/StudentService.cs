@@ -20,7 +20,7 @@ namespace LibraryServer.Service
                 throw new ArgumentNullException(nameof(id));
 
             var student = await _context.Students.
-                FirstOrDefaultAsync(t => t.Id == id);
+                FirstOrDefaultAsync(t => t.StudentId == id);
 
             if (student == null)
                 throw new Exception("Student was not found!");
@@ -52,7 +52,7 @@ namespace LibraryServer.Service
             if (string.IsNullOrEmpty(studentDTO.ClassNum))
                 throw new Exception("ClassNum is required!");
 
-            var exists = await _context.Teachers
+            var exists = await _context.Students
                 .AnyAsync(t => t.UserID == studentDTO.UserID);
 
             if (exists)
@@ -71,7 +71,7 @@ namespace LibraryServer.Service
             await _context.Students.AddAsync(student);
             await _context.SaveChangesAsync();
 
-            return student.Id;
+            return student.StudentId;
         }
 
         public async Task<StudentDTO> UpdateStudent(StudentDTO studentDTO)
@@ -114,7 +114,7 @@ namespace LibraryServer.Service
                 throw new ArgumentNullException(nameof(id));
 
             var student = await _context.Students.
-                FirstOrDefaultAsync(t => t.Id == id);
+                FirstOrDefaultAsync(t => t.StudentId == id);
 
             if (student == null)
                 throw new Exception("Teacher was not found!");
@@ -123,6 +123,21 @@ namespace LibraryServer.Service
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        public async Task<List<string>> GetAllClasses()
+        {
+            return await _context.Students
+                .Select(s => s.ClassNum)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<List<Student>> GetByClass(string classNum)
+        {
+            return await _context.Students
+                .Where(s => s.ClassNum == classNum)
+                .ToListAsync();
         }
     }
 }

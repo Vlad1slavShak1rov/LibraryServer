@@ -26,44 +26,46 @@ namespace LibraryServer.Service
                 .ToListAsync();
         }
 
-        public async Task<List<BookDTO>> GetBookByUser(int? id)
+        public async Task<List<BookDTO>> GetBookByUser(int? userId)
         {
-            if(id == null || id == 0)
+            if (userId == null || userId == 0)
             {
                 throw new ArgumentNullException("Id was null!");
             }
 
             var list = await _libraryContext.UserBooks
-                .Include(b=>b.Book)
-                .ThenInclude(a=>a.Author)
-                .Where(b=>b.UserId == id)
-                .Select(b=>new BookDTO
+                .Include(ub => ub.Book)
+                .ThenInclude(b => b.Author)
+                .Where(ub => ub.UserId == userId && ub.IsFavorite)
+                .Select(ub => new BookDTO
                 {
-                    Id = b.Book.Id,
-                    Genre = b.Book.Genre,
-                    Title = b.Book.Title,
-                    AuthorName = b.Book.Author.FullName,
-                    Description = b.Book.Description,
-                    InStock = b.Book.InStock,
-                    ImagePath = b.Book.ImagePath,
-                    TotalRate = b.Book.TotalRate,
+                    Id = ub.Book.Id,
+                    Genre = ub.Book.Genre,
+                    Title = ub.Book.Title,
+                    AuthorId = ub.Book.AuthorID,
+                    Description = ub.Book.Description,
+                    count = ub.Book.Count,
+                    InStock = ub.Book.InStock,
+                    ImagePath = ub.Book.ImagePath,
+                    TotalRate = ub.Book.TotalRate,
                 })
                 .ToListAsync();
-                
+
             return list;
         }
 
         public async Task<BookUserDTO> AddFavoriteBook(BookUserDTO? bookUserDTO)
         {
-            if(bookUserDTO == null)
+            if (bookUserDTO == null)
             {
                 throw new ArgumentNullException("Entity BookUser was null!");
             }
 
-            var bookUser = new UserBook()
+            var bookUser = new UserBook
             {
                 BookId = bookUserDTO.BookId,
                 UserId = bookUserDTO.UserID,
+                IsFavorite = true
             };
 
             await _libraryContext.UserBooks.AddAsync(bookUser);

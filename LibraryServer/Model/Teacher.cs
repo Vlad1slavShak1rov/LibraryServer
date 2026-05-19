@@ -6,7 +6,7 @@ namespace LibraryServer.Model
     public class Teacher
     {
         [Key]
-        public int Id { get; set; }
+        public int TeacherId { get; set; }
         public int UserID { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string SecondName { get; set; } = string.Empty;

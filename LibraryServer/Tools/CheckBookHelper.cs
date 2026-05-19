@@ -26,7 +26,6 @@ namespace LibraryServer.Tools
             }
 
             var book = await _context.Books
-                .Include(b => b.Author)
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (book == null)

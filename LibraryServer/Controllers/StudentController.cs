@@ -73,6 +73,35 @@ namespace LibraryServer.Controllers
                 return BadRequest(new { msg = ex.Message });
             }
         }
+        [Authorize(Roles = "Teacher,Librarian")]
+        [HttpGet("classes")]
+        public async Task<IActionResult> GetAllClasses()
+        {
+            try
+            {
+                var classes = await _studentService.GetAllClasses();
+                return Ok(classes);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { msg = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "Teacher,Librarian")]
+        [HttpGet("by-class/{classNum}")]
+        public async Task<IActionResult> GetByClass(string classNum)
+        {
+            try
+            {
+                var students = await _studentService.GetByClass(classNum);
+                return Ok(students);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { msg = ex.Message });
+            }
+        }
     }
 }
 

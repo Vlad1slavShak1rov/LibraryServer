@@ -49,7 +49,7 @@ namespace LibraryServer.Controllers
             try
             {
                 var userId = await _userService.Registration(registrationDTO);
-                return Ok(new { userId });
+                return Ok(new { success = true, userId });
             }
             catch (Exception ex)
             {

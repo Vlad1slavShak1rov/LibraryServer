@@ -20,7 +20,7 @@ namespace LibraryServer.Service
                 throw new ArgumentNullException(nameof(id));
 
             var teacher = await _context.Teachers.
-                FirstOrDefaultAsync(t => t.Id == id);
+                FirstOrDefaultAsync(t => t.TeacherId == id);
 
             if (teacher == null)
                 throw new Exception("Teacher was not found!");
@@ -74,7 +74,7 @@ namespace LibraryServer.Service
             await _context.Teachers.AddAsync(teacher);
             await _context.SaveChangesAsync();
 
-            return teacher.Id;
+            return teacher.TeacherId;
         }
 
         public async Task<TeacherDTO> UpdateTeacher(TeacherDTO teacherDTO)
@@ -118,7 +118,7 @@ namespace LibraryServer.Service
                 throw new ArgumentNullException(nameof(id));
 
             var teacher = await _context.Teachers.
-                FirstOrDefaultAsync(t => t.Id == id);
+                FirstOrDefaultAsync(t => t.TeacherId == id);
 
             if (teacher == null)
                 throw new Exception("Teacher was not found!");

@@ -8,9 +8,9 @@ namespace LibraryServer.Model
         [Key]
         public int Id { get; set; }
         public int CreaterID { get; set; }
-        public int? BookId {  get; set; }
         public string Title { get; set; }
         public string AdditionalInfo { get; set; } = string.Empty;
+        public int? BookId { get; set; }
         public DateTime DateCreated { get; set; }
 
         [ForeignKey("CreaterID")]

@@ -24,7 +24,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 );
 
 builder.Services.AddDbContext<LibraryContext>(option =>
-    option.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    option.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<BookService>();
@@ -32,6 +32,7 @@ builder.Services.AddScoped<CheckBookHelper>();
 builder.Services.AddScoped<FavoriteBookUserService>();
 builder.Services.AddScoped<AuthorService>();
 builder.Services.AddScoped<TeacherService>();
+builder.Services.AddScoped<StudentService>();
 builder.Services.AddScoped<TestService>();
 builder.Services.AddScoped<OpenRouteService>();
 builder.Services.AddScoped<BookigBookService>();

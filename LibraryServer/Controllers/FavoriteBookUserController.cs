@@ -39,13 +39,13 @@ namespace LibraryServer.Controllers
         /// </summary>
         /// <param name="id">ID пользователя</param>
         /// <returns>Список всех избранных</returns>
-        [HttpGet("{id}")]
+        [HttpGet("myFavorite/{userId}")]
         [Authorize(Roles = "Student, Librarian, Teacher")]
-        public async Task<IActionResult> GetAllFavoriteByUser([FromRoute] int id)
+        public async Task<IActionResult> GetAllFavoriteByUser([FromRoute] int userId)
         {
             try
             {
-                var list = await _favoriteBookUserService.GetBookByUser(id);
+                var list = await _favoriteBookUserService.GetBookByUser(userId);
                 return Ok(list);
             }
             catch (Exception ex)

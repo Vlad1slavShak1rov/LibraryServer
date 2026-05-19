@@ -70,7 +70,8 @@
                 ForumId = forumId,
                 SenderId = userId,
                 Message = message,
-                DateSend = DateTime.Now.Date,
+                DateSend = DateTime.UtcNow,
+                ApplicationPath = ""
             };
 
             db.ForumMessages.Add(msg);

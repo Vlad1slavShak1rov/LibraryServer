@@ -1,8 +1,11 @@
-﻿using LibraryServer.DTO;
+﻿using LibraryServer.DbContext;
+using LibraryServer.DTO;
 using LibraryServer.DTO.Tests;
+using LibraryServer.Model;
 using LibraryServer.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace LibraryServer.Controllers
 {
@@ -11,17 +14,19 @@ namespace LibraryServer.Controllers
     public class TestController : Controller
     {
         private readonly TestService _testService;
+        private readonly LibraryContext _context;
 
-        public TestController(TestService testService)
+        public TestController(TestService testService, LibraryContext context)
         {
             _testService = testService;
+            _context = context;
         }
 
         [Authorize(Roles = "Librarian, Teacher, Student")]
         [HttpGet("all")]
-        public async Task<IActionResult> GetAllTests(int userId)
+        public async Task<IActionResult> GetAllTests()
         {
-            var tests = await _testService.GetAllTests(userId);
+            var tests = await _testService.GetAllTests();
             return Ok(tests);
         }
 
@@ -116,11 +121,41 @@ namespace LibraryServer.Controllers
             }
         }
 
+        [Authorize(Roles = "Librarian, Teacher, Student")]
         [HttpGet("assigned")]
         public async Task<IActionResult> GetAssignedTests(int userId)
         {
             var tests = await _testService.GetUserAssignedTests(userId);
             return Ok(tests);
         }
+
+        [HttpGet("getTestByBookId/{bookId}")]
+        public async Task<IActionResult> GetTestByBookId(int bookId)
+        {
+            var test = await _context.Tests
+                .Where(t => t.BookId == bookId)
+                .Select(t => new
+                {
+                    id = t.Id,
+                    bookId = t.BookId,
+                    testName = t.TestName,
+                    testDesc = t.TestDescription
+                })
+                .FirstOrDefaultAsync();
+
+            if (test == null)
+                return NotFound();
+
+            return Ok(test);
+        }
+
+        [Authorize(Roles = "Teacher,Librarian")]
+        [HttpGet("assigned/teacher/{teacherId}")]
+        public async Task<IActionResult> GetAssignedByTeacher(int teacherId)
+        {
+            var data = await _testService.GetAssignedTestsByTeacher(teacherId);
+            return Ok(data);
+        }
+
     }
 }

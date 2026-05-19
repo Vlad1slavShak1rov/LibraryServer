@@ -3,6 +3,7 @@ using System;
 using LibraryServer.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LibraryServer.Migrations
 {
     [DbContext(typeof(LibraryContext))]
-    partial class LibraryContextModelSnapshot : ModelSnapshot
+    [Migration("20260513150656_update-forum")]
+    partial class updateforum
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.2");
@@ -32,22 +35,17 @@ namespace LibraryServer.Migrations
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("StudentId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("TeacherId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("TestId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("TeacherId");
-
                     b.HasIndex("TestId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("AssignedTest");
                 });
@@ -445,7 +443,7 @@ namespace LibraryServer.Migrations
 
             modelBuilder.Entity("LibraryServer.Model.Student", b =>
                 {
-                    b.Property<int>("StudentId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -471,7 +469,7 @@ namespace LibraryServer.Migrations
                     b.Property<int>("UserID")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("StudentId");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserID")
                         .IsUnique();
@@ -481,7 +479,7 @@ namespace LibraryServer.Migrations
 
             modelBuilder.Entity("LibraryServer.Model.Teacher", b =>
                 {
-                    b.Property<int>("TeacherId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -507,7 +505,7 @@ namespace LibraryServer.Migrations
                     b.Property<int>("UserID")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("TeacherId");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserID")
                         .IsUnique();
@@ -619,27 +617,21 @@ namespace LibraryServer.Migrations
 
             modelBuilder.Entity("LibraryServer.Model.AssignedTest", b =>
                 {
-                    b.HasOne("LibraryServer.Model.User", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LibraryServer.Model.User", "Teacher")
-                        .WithMany()
-                        .HasForeignKey("TeacherId");
-
                     b.HasOne("LibraryServer.Model.Test", "Test")
                         .WithMany()
                         .HasForeignKey("TestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Student");
-
-                    b.Navigation("Teacher");
+                    b.HasOne("LibraryServer.Model.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Test");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("LibraryServer.Model.Book", b =>
