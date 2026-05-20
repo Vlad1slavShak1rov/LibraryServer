@@ -1,0 +1,15 @@
+﻿bin/
+obj/
+*.user
+*.suo
+.vs/
+.vscode/
+.git/
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+docker-compose*.yml
+*.db
+*.sqlite
+wwwroot/lib/

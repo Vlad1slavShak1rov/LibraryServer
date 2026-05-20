@@ -178,7 +178,7 @@ app.UseSwaggerUI(c =>
     c.DisplayOperationId();
 });
 
-app.UseCors();
+app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
@@ -193,5 +193,23 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<LibraryContext>(); 
+        context.Database.Migrate();
+        Console.WriteLine("----> МИГРАЦИИ УСПЕШНО ПРИМЕНЕНЫ! Таблицы созданы. <----");
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Произошла ошибка при применении миграций.");
+    }
+}
+
 
 app.Run();
