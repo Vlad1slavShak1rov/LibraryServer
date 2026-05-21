@@ -31,7 +31,7 @@
       - "8080:80"
     depends_on:
       postgres:
-        condition: service_healthy # Запуск API строго после готовности СУБД
+        condition: service_healthy 
     networks:
       - library_network
     restart: unless-stopped
