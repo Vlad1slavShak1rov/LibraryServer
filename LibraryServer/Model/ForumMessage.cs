@@ -6,6 +6,7 @@ namespace LibraryServer.Model
     public class ForumMessage
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public int ForumId { get; set; }
         public int SenderId { get; set; }

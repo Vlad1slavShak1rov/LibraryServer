@@ -6,6 +6,7 @@ namespace LibraryServer.Model
     public class Events
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set;  }
         public int CreaterID { get; set; }
         public DateTime StartDate { get; set; }

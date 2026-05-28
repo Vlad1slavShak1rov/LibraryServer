@@ -6,6 +6,7 @@ namespace LibraryServer.Model
     public class Teacher
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int TeacherId { get; set; }
         public int UserID { get; set; }
         public string FirstName { get; set; } = string.Empty;

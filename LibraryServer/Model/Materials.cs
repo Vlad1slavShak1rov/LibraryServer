@@ -6,6 +6,7 @@ namespace LibraryServer.Model
     public class Materials
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public int SenderID { get; set; }
         public string Name { get; set; }

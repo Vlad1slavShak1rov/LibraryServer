@@ -6,6 +6,7 @@ namespace LibraryServer.Model
     public class Forum
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public int CreaterID { get; set; }
         public string Title { get; set; }

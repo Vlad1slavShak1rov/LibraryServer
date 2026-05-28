@@ -6,6 +6,7 @@ namespace LibraryServer.Model
     public class Book
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public int AuthorID { get; set;  }
         public string Genre { get; set; }

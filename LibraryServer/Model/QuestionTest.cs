@@ -6,6 +6,7 @@ namespace LibraryServer.Model
     public class QuestionTest
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         [Required]
         public int TestId { get; set; }
