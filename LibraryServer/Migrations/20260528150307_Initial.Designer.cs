@@ -12,8 +12,13 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LibraryServer.Migrations
 {
     [DbContext(typeof(LibraryContext))]
+<<<<<<<< HEAD:LibraryServer/Migrations/20260528150307_Initial.Designer.cs
     [Migration("20260528150307_Initial")]
     partial class Initial
+========
+    [Migration("20260531153418_InitialCreate")]
+    partial class InitialCreate
+>>>>>>>> настройка сервера с работой постгрес:LibraryServer/Migrations/20260531153418_InitialCreate.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
