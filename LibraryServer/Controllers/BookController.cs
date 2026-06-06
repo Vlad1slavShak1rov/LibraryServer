@@ -38,8 +38,10 @@ namespace LibraryServer.Controllers
         }
 
         [HttpPost("{bookId}/image")]
+        [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadImage(int bookId, IFormFile file)
         {
+
             try
             {
                 var path = await _bookService.UploadImage(bookId, file);

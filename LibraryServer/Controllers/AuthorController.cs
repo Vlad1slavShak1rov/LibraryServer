@@ -40,8 +40,10 @@ namespace LibraryServer.Controllers
 
         [HttpPost("{authorId}/image")]
         [Authorize(Roles = "Librarian")]
-        public async Task<IActionResult> LoadImage([FromRoute] int authorId, [FromBody] IFormFile file)
+
+        public async Task<IActionResult> LoadImage([FromRoute] int authorId,IFormFile file)
         {
+            Console.WriteLine($"=== FILE RECEIVED: {file?.FileName}, size: {file?.Length}");
             try
             {
                 var path = await _authorService.UploadImage(authorId, file);

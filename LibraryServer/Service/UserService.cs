@@ -148,6 +148,9 @@ namespace LibraryServer.Service
             var existingUser = await _context.Users
                 .FirstOrDefaultAsync(u => u.Login == login);
 
+            if (existingUser != null)
+                throw new Exception("This user already exist!");
+
             var newUser = new User
             {
                 Login = login,

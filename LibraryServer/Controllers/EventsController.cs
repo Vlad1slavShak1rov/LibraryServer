@@ -90,6 +90,7 @@ namespace LibraryServer.Controllers
 
         [HttpPost("{eventId}/upload-photo")]
         [Authorize(Roles = "Librarian, Teacher")]
+        [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadEventPhoto([FromRoute] int eventId, IFormFile file)
         {
             try

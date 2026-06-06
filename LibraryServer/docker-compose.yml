@@ -31,6 +31,8 @@ services:
     networks:
       - library_network
     restart: unless-stopped
+    volumes: 
+     - ./wwwroot:/app/wwwroot  
 
   pgadmin:
     image: dpage/pgadmin4:latest
