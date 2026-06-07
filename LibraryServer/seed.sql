@@ -24,8 +24,8 @@ CREATE TABLE "Authors" (
     "SecondName" TEXT NOT NULL,
     "Description" TEXT NOT NULL,
     "ImagePath" TEXT,
-    "DateOfBirth" TEXT NOT NULL,
-    "DateOfDeath" TEXT
+    "DateOfBirth" TIMESTAMP  NOT NULL,
+    "DateOfDeath" TIMESTAMP 
 );
 
 CREATE TABLE "Books" (
@@ -53,8 +53,8 @@ CREATE TABLE "AssignedTest" (
     "StudentId" INTEGER NOT NULL REFERENCES "Users"("Id") ON DELETE CASCADE,
     "TeacherId" INTEGER REFERENCES "Users"("Id"),
     "TestId" INTEGER NOT NULL REFERENCES "Tests"("Id") ON DELETE CASCADE,
-    "AssignedAt" TEXT NOT NULL,
-    "DueDate" TEXT,
+    "AssignedAt" TIMESTAMP  NOT NULL,
+    "DueDate" TIMESTAMP,
     "IsCompleted" BOOLEAN NOT NULL
 );
 
@@ -99,7 +99,7 @@ CREATE TABLE "Results" (
     "UserId" INTEGER NOT NULL REFERENCES "Users"("Id") ON DELETE CASCADE,
     "TestId" INTEGER NOT NULL REFERENCES "Tests"("Id") ON DELETE CASCADE,
     "PercentSuccess" REAL NOT NULL,
-    "CreatedAt" TEXT NOT NULL
+    "CreatedAt" TIMESTAMP  NOT NULL
 );
 
 CREATE TABLE "__EFMigrationsHistory" (
